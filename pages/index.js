@@ -6,18 +6,10 @@ export default function Home() {
   return (
     <div className="container">
       <Head>
-        <title>Next.js Starter!</title>
+        <title>POC — Duikmateriaal Huur (SEPA QR)</title>
         <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main>
-        <!doctype html>
-<html lang="nl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>POC — Duikmateriaal Huur (SEPA QR)</title>
-  <style>
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
     :root { --gap: 14px; }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
     body { margin: 0; padding: 24px; background:#0b1220; color:#eaf2ff; }
@@ -61,8 +53,10 @@ export default function Home() {
       .items { grid-template-columns: 1fr auto 1fr auto; }
     }
   </style>
-</head>
-<body>
+      </Head>
+
+      <main>
+       
   <div class="app">
     <header class="grid">
       <h1>POC — Duikmateriaal Huur (SEPA QR)</h1>
@@ -350,8 +344,7 @@ export default function Home() {
     document.getElementById('btnSave').addEventListener('click', savePng);
     document.getElementById('btnCopy').addEventListener('click', copyPayload);
   </script>
-</body>
-</html>
+
 
       </main>
 
