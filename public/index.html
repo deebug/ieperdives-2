@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>POC — Duikmateriaal Huur (SEPA QR)</title>
+  <title>Ieper Dives POC</title>
   <style>
     :root { --gap: 14px; }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
@@ -50,8 +50,7 @@
 <body>
   <div class="app">
     <header class="grid">
-      <h1>Ieper Dives - Huur</h1>
-      <p class="muted">Kies aantallen met +/–, we berekenen het huurbedrag en maken een EPC-QR (SCT). Mededeling = samenvatting (afgekapt tot 140 bytes).</p>
+      <h1>Ieper Dives</h1>
     </header>
 
     
@@ -107,6 +106,16 @@
           <button class="qtybtn" data-action="inc">+</button>
         </div>
         <div class="line" data-line="MASKER">0,00</div>
+      </div>
+
+      <div>Fles+vulling</div>
+        <div class="price" data-price="10.00">10,00</div>
+        <div class="qtywrap" data-sku="FLES">
+          <button class="qtybtn" data-action="dec">−</button>
+          <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
+          <button class="qtybtn" data-action="inc">+</button>
+        </div>
+        <div class="line" data-line="FLES">0,00</div>
       </div>
 
       <div class="totals">
@@ -225,7 +234,13 @@
           row.input.value = qty;
           const line = qty * row.price;
           total += (isFinite(line) && !isNaN(line)) ? line : 0;
-          row.lineEl.textContent = (line > 0 ? dot2(line).replace('.', ',') : '0,00');
+          // Check if row.lineEl exists before setting textContent
+          if (row.lineEl) {
+            row.lineEl.textContent = (line > 0 ? dot2(line).replace('.', ',') : '0,00');
+          } else {
+            // Handle the case where row.lineEl is null, e.g., log a warning or skip the row
+            console.warn('Skipping row due to missing line element:', row);
+          }
         } else {
           // Handle the case where row.input is null, e.g., log a warning or skip the row
           console.warn('Skipping row due to missing input element:', row);
