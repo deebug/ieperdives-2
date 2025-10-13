@@ -216,14 +216,21 @@
     });
 
     // ===== Berekening + UI =====
-    function updateLinesAndTotal(){
+       
+    function updateLinesAndTotal() {
       let total = 0;
-      for (const row of items){
-        const qty = clamp(parseInt(row.input.value || '0',10) || 0, 0, 999);
-        row.input.value = qty;
-        const line = qty * row.price;
-        total += (isFinite(line) && !isNaN(line)) ? line : 0;
-        row.lineEl.textContent = (line > 0 ? dot2(line).replace('.', ',') : '0,00');
+      for (const row of items) {
+        // Check if row.input is not null before accessing its value property
+        if (row.input) {
+          const qty = clamp(parseInt(row.input.value || '0', 10) || 0, 0, 999);
+          row.input.value = qty;
+          const line = qty * row.price;
+          total += (isFinite(line) && !isNaN(line)) ? line : 0;
+          row.lineEl.textContent = (line > 0 ? dot2(line).replace('.', ',') : '0,00');
+        } else {
+          // Handle the case where row.input is null, e.g., log a warning or skip the row
+          console.warn('Skipping row due to missing input element:', row);
+        }
       }
       document.getElementById('total').textContent = eur(total);
       document.getElementById('remit').placeholder = buildRemittance(true);
