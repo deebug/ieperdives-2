@@ -65,7 +65,7 @@
         <div class="hdr" style="text-align:right">Aantal</div>
         <div class="hdr line">Lijn (€)</div>
 
-        <div>Handschoenen (5 mm neopreen)</div>
+        <div>Handschoenen</div>
         <div class="price" data-price="4.50">4,50</div>
         <div class="qtywrap" data-sku="HANDSCHOENEN">
           <button class="qtybtn" data-action="dec" aria-label="verlaag">−</button>
@@ -74,7 +74,7 @@
         </div>
         <div class="line" data-line="HANDSCHOENEN">0,00</div>
 
-        <div>Vinnen (open heel)</div>
+        <div>Vinnen</div>
         <div class="price" data-price="9.00">9,00</div>
         <div class="qtywrap" data-sku="VINNEN">
           <button class="qtybtn" data-action="dec">−</button>
@@ -83,16 +83,16 @@
         </div>
         <div class="line" data-line="VINNEN">0,00</div>
 
-        <div>Botjes (schoenen met rits)</div>
+        <div>Schoenen</div>
         <div class="price" data-price="5.00">5,00</div>
-        <div class="qtywrap" data-sku="BOTJES">
+        <div class="qtywrap" data-sku="Schoenen">
           <button class="qtybtn" data-action="dec">−</button>
           <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
           <button class="qtybtn" data-action="inc">+</button>
         </div>
         <div class="line" data-line="BOTJES">0,00</div>
 
-        <div>Jacket / BCD ("jockey")</div>
+        <div>Jacket / BCD</div>
         <div class="price" data-price="25.00">25,00</div>
         <div class="qtywrap" data-sku="JACKET">
           <button class="qtybtn" data-action="dec">−</button>
@@ -101,7 +101,7 @@
         </div>
         <div class="line" data-line="JACKET">0,00</div>
 
-        <div>Masker (gehard glas)</div>
+        <div>Masker</div>
         <div class="price" data-price="6.00">6,00</div>
         <div class="qtywrap" data-sku="MASKER">
           <button class="qtybtn" data-action="dec">−</button>
@@ -112,7 +112,7 @@
       </div>
 
       <div class="totals">
-        <div class="label">Totaal (€/dag):</div>
+        <div class="label">Totaal (€):</div>
         <div id="total" class="amount mono">€ 0,00</div>
       </div>
     </section>
@@ -168,7 +168,7 @@
 
   <script>
     // ——— Helpers ———
-    const € = (n) => new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(n);
+    const eur = (n) => new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(n);
     const dot2 = (n) => (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
     const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
     const MAX_REMIT = 140; // EPC ongestructureerde mededeling max 140 tekens
@@ -192,7 +192,7 @@
         total += line;
         document.querySelector(`[data-line="${sku}"]`).textContent = line ? line.toFixed(2).replace('.', ',') : '0,00';
       });
-      document.getElementById('total').textContent = €(total);
+      document.getElementById('total').textContent = eur(total);
       // Update automatische mededeling placeholder
       document.getElementById('remit').placeholder = buildRemittance(true);
       return total;
