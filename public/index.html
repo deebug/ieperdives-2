@@ -50,8 +50,8 @@
 <body>
   <div class="app">
     <header class="grid">
-      <h1>POC — Duikmateriaal Huur (SEPA QR)</h1>
-      <p class="muted">Kies aantallen met +/–, we berekenen het huurbedrag en maken een EPC-QR (SCT) naar een fictieve rekening. Mededeling = samenvatting (afgekapt tot 140 bytes).</p>
+      <h1>Ieper Dives - Huur</h1>
+      <p class="muted">Kies aantallen met +/–, we berekenen het huurbedrag en maken een EPC-QR (SCT). Mededeling = samenvatting (afgekapt tot 140 bytes).</p>
     </header>
 
     <!-- Artikelen met huurprijzen (fictief, per dag) -->
@@ -59,7 +59,7 @@
       <h2 style="margin:0">Artikelen (huurprijs/dag)</h2>
       <div class="items mono">
         <div class="hdr">Artikel</div>
-        <div class="hdr price">€/dag</div>
+        <div class="hdr price">€</div>
         <div class="hdr" style="text-align:right">Aantal</div>
         <div class="hdr line">Lijn (€)</div>
 
@@ -110,7 +110,7 @@
       </div>
 
       <div class="totals">
-        <div class="label">Totaal (€/dag):</div>
+        <div class="label">Totaal (€):</div>
         <div id="total" class="amount mono">€ 0,00</div>
       </div>
     </section>
@@ -120,12 +120,12 @@
       <h2 style="margin:0">Ontvanger (fictief)</h2>
       <div class="grid" style="grid-template-columns:1fr 1fr; gap: var(--gap);">
         <label>Rekeninghouder
-          <input id="benefName" type="text" value="DIVE RENTALS POC" />
+          <input id="benefName" type="text" value="IEPER DIVES" />
         </label>
-        <label>IBAN (fictief)
+        <label>IBAN
           <input id="iban" class="mono" type="text" value="BE73001942760860" />
         </label>
-        <label>BIC (optioneel)
+        <label>BIC
           <input id="bic" class="mono" type="text" value="GEBABEBB" />
         </label>
         <label>Mededeling (automatisch)
@@ -148,13 +148,13 @@
         <div class="grid" style="min-width: 300px;">
           <div><strong>EPC-payload</strong></div>
           <textarea id="payload" rows="10" class="mono" spellcheck="false" readonly></textarea>
-          <div class="small">Scanbaar in de meeste EU-bankapps (SCT). Dit is een demonstratie met fictieve rekening.</div>
+          <div class="small">Scanbaar in de meeste EU-bankapps (SCT).</div>
         </div>
       </div>
     </section>
 
     <footer class="small muted">
-      Tip: lang indrukken op +/− zorgt voor auto-repeat. IBAN/BIC/naam kun je altijd aanpassen.
+      Tip: lang indrukken op +/− zorgt voor auto-repeat.
     </footer>
   </div>
 
