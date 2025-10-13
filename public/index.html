@@ -269,11 +269,20 @@
 
     function buildRemittance(asPlaceholder=false){
       const parts = items.map(r=>{
-        const qty = parseInt(r.input.value||'0',10) || 0;
+        // Check if r.input is not null before accessing r.input.value
+        const qty = parseInt(r.input ? r.input.value || '0' : '0', 10) || 0;
         if (!qty) return null;
         const base = r.label.split('(')[0].trim();
         return `${base}x${qty}`; // ASCII 'x'
       }).filter(Boolean);
+
+
+      const ts = new Date().toISOString().slice(0,16).replace('T','').replace(':',''); // 202510132015
+      let text = (parts.length ? parts.join(' / ') : 'GEEN SELECTIE') + ` - HUUR ${ts}`;
+      text = toAsciiSafe(text);
+      if (byteLen(text) > MAX_REMIT_BYTES) text = truncateBytes(text, MAX_REMIT_BYTES);
+
+      if (asPlaceholder) return text;
 
       const ts = new Date().toISOString().slice(0,16).replace('T','').replace(':',''); // 202510132015
       let text = (parts.length ? parts.join(' / ') : 'GEEN SELECTIE') + ` - HUUR ${ts}`;
