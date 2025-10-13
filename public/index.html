@@ -283,13 +283,6 @@
       if (byteLen(text) > MAX_REMIT_BYTES) text = truncateBytes(text, MAX_REMIT_BYTES);
 
       if (asPlaceholder) return text;
-
-      const ts = new Date().toISOString().slice(0,16).replace('T','').replace(':',''); // 202510132015
-      let text = (parts.length ? parts.join(' / ') : 'GEEN SELECTIE') + ` - HUUR ${ts}`;
-      text = toAsciiSafe(text);
-      if (byteLen(text) > MAX_REMIT_BYTES) text = truncateBytes(text, MAX_REMIT_BYTES);
-
-      if (asPlaceholder) return text;
       const manual = document.getElementById('remit').value.trim();
       const chosen = manual ? toAsciiSafe(manual) : text;
       return (byteLen(chosen) > MAX_REMIT_BYTES) ? truncateBytes(chosen, MAX_REMIT_BYTES) : chosen;
