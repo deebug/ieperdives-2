@@ -54,52 +54,52 @@
       <p class="muted">Kies aantallen met +/–, we berekenen het huurbedrag en maken een EPC-QR (SCT). Mededeling = samenvatting (afgekapt tot 140 bytes).</p>
     </header>
 
-    <!-- Artikelen met huurprijzen (fictief, per dag) -->
+    
     <section class="card grid">
-      <h2 style="margin:0">Artikelen (huurprijs/dag)</h2>
+      <h2 style="margin:0">Artikelen (huurprijs)</h2>
       <div class="items mono">
         <div class="hdr">Artikel</div>
         <div class="hdr price">€</div>
         <div class="hdr" style="text-align:right">Aantal</div>
         <div class="hdr line">Lijn (€)</div>
 
-        <div>Handschoenen (5 mm neopreen)</div>
+        <div>Handschoenen</div>
         <div class="price" data-price="4.50">4,50</div>
-        <div class="qtywrap" data-sku="HANDSCHOENEN">
+        <div class="qtywrap" data-sku="HANDSCH">
           <button class="qtybtn" data-action="dec" aria-label="verlaag">−</button>
           <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
           <button class="qtybtn" data-action="inc" aria-label="verhoog">+</button>
         </div>
         <div class="line" data-line="HANDSCHOENEN">0,00</div>
 
-        <div>Vinnen (open heel)</div>
+        <div>Vinnen</div>
         <div class="price" data-price="9.00">9,00</div>
-        <div class="qtywrap" data-sku="VINNEN">
+        <div class="qtywrap" data-sku="VIN">
           <button class="qtybtn" data-action="dec">−</button>
           <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
           <button class="qtybtn" data-action="inc">+</button>
         </div>
         <div class="line" data-line="VINNEN">0,00</div>
 
-        <div>Botjes (schoenen met rits)</div>
+        <div>Schoenen</div>
         <div class="price" data-price="5.00">5,00</div>
-        <div class="qtywrap" data-sku="BOTJES">
+        <div class="qtywrap" data-sku="SCHOEN">
           <button class="qtybtn" data-action="dec">−</button>
           <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
           <button class="qtybtn" data-action="inc">+</button>
         </div>
         <div class="line" data-line="BOTJES">0,00</div>
 
-        <div>Jacket / BCD ("jockey")</div>
+        <div>Jacket</div>
         <div class="price" data-price="25.00">25,00</div>
-        <div class="qtywrap" data-sku="JACKET">
+        <div class="qtywrap" data-sku="BCD">
           <button class="qtybtn" data-action="dec">−</button>
           <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
           <button class="qtybtn" data-action="inc">+</button>
         </div>
         <div class="line" data-line="JACKET">0,00</div>
 
-        <div>Masker (gehard glas)</div>
+        <div>Masker</div>
         <div class="price" data-price="6.00">6,00</div>
         <div class="qtywrap" data-sku="MASKER">
           <button class="qtybtn" data-action="dec">−</button>
@@ -120,19 +120,18 @@
       <h2 style="margin:0">Ontvanger (fictief)</h2>
       <div class="grid" style="grid-template-columns:1fr 1fr; gap: var(--gap);">
         <label>Rekeninghouder
-          <input id="benefName" type="text" value="IEPER DIVES" />
+          <input id="benefName" type="text" value="IEPER DIVES" readonly="readonly" />
         </label>
         <label>IBAN
-          <input id="iban" class="mono" type="text" value="BE73001942760860" />
+          <input id="iban" class="mono" type="text" value="BE73001942760860" readonly="readonly" />
         </label>
         <label>BIC
-          <input id="bic" class="mono" type="text" value="GEBABEBB" />
+          <input id="bic" class="mono" type="text" value="GEBABEBB" readonly="readonly" />
         </label>
         <label>Mededeling (automatisch)
           <input id="remit" type="text" placeholder="auto gegenereerd" />
         </label>
       </div>
-      <p class="small">EPC-SCT payload met ongestructureerde mededeling (max. 140 bytes). We kappen automatisch af.</p>
     </section>
 
     <section class="card grid">
@@ -237,30 +236,50 @@
       return total;
     }
 
-    function bindQty(){
-      document.querySelectorAll('.qtywrap').forEach(wrap=>{
+    function bindQty() {
+      document.querySelectorAll('.qtywrap').forEach(wrap => {
         const input = wrap.querySelector('.qtyval');
         const dec = wrap.querySelector('[data-action="dec"]');
         const inc = wrap.querySelector('[data-action="inc"]');
-
-        const step = (d)=>{ input.value = clamp((parseInt(input.value||'0',10)||0)+d, 0, 999); updateLinesAndTotal(); };
-
-        let holdTimer=null, repeatTimer=null;
-        const startHold=(d)=>{ step(d); holdTimer=setTimeout(()=>{ repeatTimer=setInterval(()=>step(d),70); },350); };
-        const endHold=()=>{ clearTimeout(holdTimer); clearInterval(repeatTimer); holdTimer=repeatTimer=null; };
-
-        dec.addEventListener('click', ()=>step(-1));
-        inc.addEventListener('click', ()=>step(1));
-        ['pointerdown','mousedown','touchstart'].forEach(evt=>{
-          dec.addEventListener(evt, e=>{ e.preventDefault(); startHold(-1); });
-          inc.addEventListener(evt, e=>{ e.preventDefault(); startHold(1); });
+        if (!input || !dec || !inc) return;
+    
+        const step = (delta) => {
+          const v = clamp((parseInt(input.value || '0', 10) || 0) + delta, 0, 999);
+          input.value = v;
+          updateLinesAndTotal();
+        };
+    
+        let holdTimer = null, repeatTimer = null;
+        const startHold = (delta) => {
+          step(delta);
+          holdTimer = setTimeout(() => {
+            repeatTimer = setInterval(() => step(delta), 70);
+          }, 350);
+        };
+        const endHold = () => {
+          clearTimeout(holdTimer);
+          clearInterval(repeatTimer);
+          holdTimer = repeatTimer = null;
+        };
+    
+        // --- PATCH ---
+        // Gebruik alleen pointer-events; géén 'click' meer (anders telt dubbel)
+        ['pointerdown'].forEach(evt => {
+          dec.addEventListener(evt, e => { e.preventDefault(); startHold(-1); });
+          inc.addEventListener(evt, e => { e.preventDefault(); startHold(1); });
         });
-        ['pointerup','mouseleave','mouseup','touchend','touchcancel'].forEach(evt=>{
-          dec.addEventListener(evt, endHold);
-          inc.addEventListener(evt, endHold);
-        });
+        ['pointerup', 'pointerleave', 'touchend', 'touchcancel', 'mouseup', 'mouseleave']
+          .forEach(evt => {
+            dec.addEventListener(evt, endHold);
+            inc.addEventListener(evt, endHold);
+          });
+    
+        // Handmatige invoer blijft
         input.addEventListener('input', updateLinesAndTotal);
-        input.addEventListener('blur', ()=>{ input.value = clamp(parseInt(input.value||'0',10)||0,0,999); updateLinesAndTotal(); });
+        input.addEventListener('blur', () => {
+          input.value = clamp(parseInt(input.value || '0', 10) || 0, 0, 999);
+          updateLinesAndTotal();
+        });
       });
     }
 
@@ -278,7 +297,7 @@
 
 
       const ts = new Date().toISOString().slice(0,16).replace('T','').replace(':',''); // 202510132015
-      let text = (parts.length ? parts.join(' / ') : 'GEEN SELECTIE') + ` - HUUR ${ts}`;
+      let text = (parts.length ? parts.join(' / ') : 'GEEN SELECTIE');
       text = toAsciiSafe(text);
       if (byteLen(text) > MAX_REMIT_BYTES) text = truncateBytes(text, MAX_REMIT_BYTES);
 
