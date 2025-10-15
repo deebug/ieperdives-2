@@ -11,12 +11,11 @@
 
         <!-- Artikelen met huurprijzen -->
         <section class="card grid">
-            <h2 style="margin:0">Artikelen (huurprijs)</h2>
             <div class="items mono" id="items">
-                <div class="hdr">Artikel</div>
-                <div class="hdr price">€</div>
-                <div class="hdr" style="text-align:right">Aantal</div>
-                <div class="hdr line">Lijn (€)</div>
+                <div class="hdr">Artikelen</div>
+                <div class="hdr price">€/st.</div>
+                <div class="hdr" style="text-align:center">Aantal</div>
+                <div class="hdr line">€/lijn</div>
 
                 <!-- Elke rij: let op data-sku en data-line: ze MOETEN gelijk zijn -->
                 <div>Handschoenen</div>
@@ -84,7 +83,7 @@
 
                 <!-- CUSTOM ITEM -->
                 <div>
-                    <input id="customLabel" type="text" placeholder="Eigen/extra item"
+                    <input id="customLabel" type="text" placeholder="Extra"
                            autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" />
                 </div>
                 <div class="price">
@@ -99,16 +98,39 @@
                 <div class="line" data-line="CUSTOM">0,00</div>
             </div>
             <div class="totals">
-                <div class="label">Totaal (€):</div>
+                <div class="label">Totaal: </div>
                 <div id="total" class="amount mono">€ 0,00</div>
             </div>
-</section>
+        </section>
 
         <!-- Opmerkingen -->
         <section class="card grid">
-            <h2 style="margin:0">Opmerkingen (max. 200 tekens)</h2>
-            <textarea id="note" rows="4" maxlength="200" spellcheck="false" placeholder="Extra info voor de verkoper (optioneel)."></textarea>
-            <div class="count"><span id="noteCount">0</span>/200</div>
+            <h2 style="margin:0">Opmerkingen</h2>
+            <textarea id="note" rows="2" maxlength="50" spellcheck="false" placeholder="Extra info voor de verkoper (optioneel)."></textarea>
+            <div class="count"><span id="noteCount">0</span>/50</div>
+        </section>
+
+
+
+
+
+        <section class="card grid">
+            <h2 style="margin:0">QR</h2>
+            <div class="row">
+                <button id="btnGen" class="primary hide">Genereer</button>
+                <button id="btnCopyLink" class="ghost">Kopieer</button>
+                <button id="btnSave" class="ghost">Download</button>
+                <button id="btnCopy" class="ghost hide">Kopieer payload</button>
+            </div>
+
+            <div class="qrwrap">
+                <div id="qrcode"></div>
+                <div class="grid hide" style="min-width: 320px;">
+                    <div><strong>EPC-payload</strong></div>
+                    <textarea id="payload" rows="12" class="mono" spellcheck="false" readonly></textarea>
+                    <div class="small">Scanbaar in EU-bankapps (SCT). Mededeling wordt automatisch samengevat.</div>
+                </div>
+            </div>
         </section>
 
         <!-- Ontvanger & QR -->
@@ -127,30 +149,7 @@
                     BIC
                     <input id="bic" class="mono" type="text" value="GEBABEBB" readonly />
                 </label>
-                
-                    <textarea id="remit" rows="4" placeholder="auto gegenereerd" spellcheck="false" readonly></textarea>
-                
-            </div>
-        </section>
-
-
-
-        <section class="card grid">
-            <h2 style="margin:0">Genereer QR</h2>
-            <div class="row">
-                <button id="btnGen" class="primary">Genereer Betaal-QR</button>
-                <button id="btnCopyLink" class="ghost">Kopieer QR-link</button>
-                <button id="btnSave" class="ghost">Download QR (PNG)</button>
-                <button id="btnCopy" class="ghost hide">Kopieer EPC-payload</button>
-            </div>
-
-            <div class="qrwrap">
-                <div id="qrcode"></div>
-                <div class="grid hide" style="min-width: 320px;">
-                    <div><strong>EPC-payload</strong></div>
-                    <textarea id="payload" rows="12" class="mono" spellcheck="false" readonly></textarea>
-                    <div class="small">Scanbaar in EU-bankapps (SCT). Mededeling wordt automatisch samengevat.</div>
-                </div>
+                <textarea id="remit" rows="2" placeholder="auto gegenereerd" spellcheck="false" readonly></textarea>
             </div>
         </section>
 

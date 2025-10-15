@@ -2,6 +2,15 @@
 const eur = n => new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(isFinite(n) ? n : 0);
 const dot2 = n => (Math.round((Number(n) || 0) * 100) / 100).toFixed(2);
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v || 0));
+// --- debounce om overmatig hertekenen te voorkomen tijdens ingedrukt houden
+function debounce(fn, delay = 120) {
+  let t; 
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+// Call dit om QR te bouwen na elke wijziging
+const autoGen = debounce(() => generate(), 120);
+
+
 
 // UTF-8 byte tools (compact)
 const enc = new TextEncoder(), dec = new TextDecoder();
@@ -56,7 +65,8 @@ function recalc() {
         r.lineEl.textContent = line > 0 ? dot2(line).replace('.', ',') : '0,00';
     }
     document.getElementById('total').textContent = eur(total);
-    document.getElementById('remit').placeholder = buildRemit(true);
+    const remitEl = document.getElementById('remit');
+    if (remitEl) remitEl.value = buildRemit(true); // toon actuele auto-mededeling
     return total;
 }
 
@@ -69,12 +79,18 @@ function bindQty() {
         const step = d => {
             const cur = parseInt(r.qtyEl.textContent, 10) || 0;
             r.qtyEl.textContent = clamp(cur + d, 0, 999);
-            recalc();
+            autoGen();
         };
 
         let hold = null, rep = null;
-        const start = (d) => { step(d); hold = setTimeout(() => rep = setInterval(() => step(d), 70), 350); };
-        const end = () => { clearTimeout(hold); clearInterval(rep); hold = rep = null; };
+        const start = (d) => { 
+          step(d); 
+          hold = setTimeout(() => rep = setInterval(() => step(d), 70), 350); 
+        };
+        const end = () => { 
+          clearTimeout(hold); clearInterval(rep); hold = rep = null; 
+          autoGen(); // laatste update na loslaten
+        };
 
         dec.addEventListener('pointerdown', e => { e.preventDefault(); start(-1); });
         inc.addEventListener('pointerdown', e => { e.preventDefault(); start(+1); });
@@ -98,15 +114,18 @@ function buildRemit(asPlaceholder = false) {
     }).filter(Boolean);
 
     // Voeg optionele opmerkingen toe (maar respecteer limiet)
-    const note = (document.getElementById('note').value || '').trim();
     let txt = (parts.length ? parts.join(' / ') : 'GEEN SELECTIE');
-    if (note) txt += ` // ${note}`;
+    const noteText = (noteEl?.value || '').trim();
+    if (noteText) txt += ` // ${noteText}`;
 
     txt = toAscii(txt);
     if (byteLen(txt) > MAX_REMIT_BYTES) txt = truncBytes(txt, MAX_REMIT_BYTES);
 
     if (asPlaceholder) return txt;
-    const manual = (document.getElementById('remit').value || '').trim();
+    const remitEl = document.getElementById('remit');
+    const manual = (remitEl && !remitEl.readOnly && !remitEl.hasAttribute('readonly'))
+      ? (remitEl.value || '').trim()
+      : '';
     const chosen = manual ? toAscii(manual) : txt;
     return byteLen(chosen) > MAX_REMIT_BYTES ? truncBytes(chosen, MAX_REMIT_BYTES) : chosen;
 }
@@ -128,7 +147,7 @@ function buildEpc({ name, iban, bic, amount, remit }) {
 function renderQR(text) {
     const box = document.getElementById('qrcode');
     box.innerHTML = '';
-    new QRCode(box, { text, width: 256, height: 256, correctLevel: QRCode.CorrectLevel.L });
+    new QRCode(box, { text, width: 512, height: 512, correctLevel: QRCode.CorrectLevel.L });
 }
 
 // ---------- Actions ----------
@@ -160,13 +179,13 @@ function savePng() {
     else alert('Genereer eerst de QR.');
 }
 
-// ---------- Opmerkingen teller ----------
-const note = document.getElementById('note');
+// ---------- Opmerkingen ----------
+const noteEl = document.getElementById('note');
 const noteCount = document.getElementById('noteCount');
-note.addEventListener('input', () => {
-    noteCount.textContent = (note.value || '').length;
-    // update placeholder mededeling live
-    document.getElementById('remit').placeholder = buildRemit(true);
+
+noteEl?.addEventListener('input', () => {
+  if (noteCount) noteCount.textContent = (noteEl.value || '').length;
+  autoGen(); // QR+payload live vernieuwen
 });
 
 function getQrDataUrl() {
