@@ -1,395 +1,170 @@
 <!doctype html>
 <html lang="nl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ieper Dives POC</title>
-  <style>
-    :root { --gap: 14px; }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body { margin: 0; padding: 24px; background:#0b1220; color:#eaf2ff; }
-    .app { max-width: 980px; margin: 0 auto; display: grid; gap: var(--gap); }
-    h1 { margin: 0 0 6px; font-size: 22px; }
-    .card { background: #121a2c; border: 1px solid #1f2a44; border-radius: 12px; padding: 16px; }
-    .grid { display:grid; gap: var(--gap); }
-    .items { display:grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items:center }
-    .items > div { padding: 10px 0; border-bottom: 1px dashed #28365b; }
-    .items .hdr { font-weight:600; color:#bcd3ff; border-bottom-color:#3a4f82; }
-    .price, .line { text-align:right; font-variant-numeric: tabular-nums; }
-    .qtywrap { display:flex; align-items:center; gap:10px; justify-content:flex-end; }
-    .qtybtn {
-      min-width: 44px; min-height: 44px; border-radius: 10px; border:1px solid #2a3d67;
-      background:#0f1627; color:#eaf2ff; font-size: 20px; line-height: 1; padding: 0 0 2px;
-      touch-action: manipulation; user-select: none;
-    }
-    .qtyval {
-      width: 64px; text-align:center; border:1px solid #2a3d67; border-radius:10px; padding:10px 12px;
-      background:#0f1627; color:#eaf2ff; font-variant-numeric: tabular-nums;
-    }
-    .totals { display:flex; justify-content: flex-end; gap: 8px; align-items: baseline; }
-    .totals .label { color:#bcd3ff; }
-    .totals .amount { font-size: 22px; font-weight: 700; }
-    .row { display:flex; gap: 10px; flex-wrap: wrap; }
-    input[type="text"] { width: 100%; }
-    input, select, button, textarea {
-      background:#0f1627; color:#eaf2ff; border:1px solid #2a3d67; border-radius:10px; padding:10px 12px;
-    }
-    button { cursor:pointer; }
-    button.primary { background:#2d67ff; border-color:#2d67ff; color:white; }
-    button.ghost { background:transparent; }
-    .qrwrap { display:flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-    #qrcode { background:white; padding:10px; border-radius:12px; }
-    .small { color:#9db6ff; font-size: 12px; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-    .muted { color:#9db6ff; }
-    @media (max-width: 640px){
-      .items { grid-template-columns: 1fr auto 1fr auto; }
-    }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ieper Dives</title>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="grid">
-      <h1>Ieper Dives</h1>
-    </header>
+    <div class="app">
+        <header class="grid">
+            <h1>Ieper Dives</h1>
+        </header>
 
-    
-    <section class="card grid">
-      <h2 style="margin:0">Artikelen (huurprijs)</h2>
-      <div class="items mono">
-        <div class="hdr">Artikel</div>
-        <div class="hdr price">€</div>
-        <div class="hdr" style="text-align:right">Aantal</div>
-        <div class="hdr line">Lijn (€)</div>
+        <!-- Artikelen met huurprijzen -->
+        <section class="card grid">
+            <h2 style="margin:0">Artikelen (huurprijs)</h2>
+            <div class="items mono" id="items">
+                <div class="hdr">Artikel</div>
+                <div class="hdr price">€</div>
+                <div class="hdr" style="text-align:right">Aantal</div>
+                <div class="hdr line">Lijn (€)</div>
 
-        <div>Handschoenen</div>
-        <div class="price" data-price="4.50">4,50</div>
-        <div class="qtywrap" data-sku="HANDSCH">
-          <button class="qtybtn" data-action="dec" aria-label="verlaag">−</button>
-          <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
-          <button class="qtybtn" data-action="inc" aria-label="verhoog">+</button>
-        </div>
-        <div class="line" data-line="HANDSCHOENEN">0,00</div>
+                <!-- Elke rij: let op data-sku en data-line: ze MOETEN gelijk zijn -->
+                <div>Handschoenen</div>
+                <div class="price" data-price="4.50">4,50</div>
+                <div class="qtywrap" data-sku="HANDSCH">
+                    <button class="qtybtn" data-action="dec" aria-label="verlaag">−</button>
+                    <span class="qtyval" aria-live="polite">0</span>
+                    <button class="qtybtn" data-action="inc" aria-label="verhoog">+</button>
+                </div>
+                <div class="line" data-line="HANDSCH">0,00</div>
 
-        <div>Vinnen</div>
-        <div class="price" data-price="9.00">9,00</div>
-        <div class="qtywrap" data-sku="VIN">
-          <button class="qtybtn" data-action="dec">−</button>
-          <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
-          <button class="qtybtn" data-action="inc">+</button>
-        </div>
-        <div class="line" data-line="VINNEN">0,00</div>
+                <div>Vinnen</div>
+                <div class="price" data-price="9.00">9,00</div>
+                <div class="qtywrap" data-sku="VIN">
+                    <button class="qtybtn" data-action="dec">−</button>
+                    <span class="qtyval" aria-live="polite">0</span>
+                    <button class="qtybtn" data-action="inc">+</button>
+                </div>
+                <div class="line" data-line="VIN">0,00</div>
 
-        <div>Schoenen</div>
-        <div class="price" data-price="5.00">5,00</div>
-        <div class="qtywrap" data-sku="SCHOEN">
-          <button class="qtybtn" data-action="dec">−</button>
-          <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
-          <button class="qtybtn" data-action="inc">+</button>
-        </div>
-        <div class="line" data-line="BOTJES">0,00</div>
+                <div>Schoenen</div>
+                <div class="price" data-price="5.00">5,00</div>
+                <div class="qtywrap" data-sku="SCHOEN">
+                    <button class="qtybtn" data-action="dec">−</button>
+                    <span class="qtyval" aria-live="polite">0</span>
+                    <button class="qtybtn" data-action="inc">+</button>
+                </div>
+                <div class="line" data-line="SCHOEN">0,00</div>
 
-        <div>Jacket</div>
-        <div class="price" data-price="25.00">25,00</div>
-        <div class="qtywrap" data-sku="BCD">
-          <button class="qtybtn" data-action="dec">−</button>
-          <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
-          <button class="qtybtn" data-action="inc">+</button>
-        </div>
-        <div class="line" data-line="JACKET">0,00</div>
+                <div>Jacket</div>
+                <div class="price" data-price="25.00">25,00</div>
+                <div class="qtywrap" data-sku="BCD">
+                    <button class="qtybtn" data-action="dec">−</button>
+                    <span class="qtyval" aria-live="polite">0</span>
+                    <button class="qtybtn" data-action="inc">+</button>
+                </div>
+                <div class="line" data-line="BCD">0,00</div>
 
-        <div>Masker</div>
-        <div class="price" data-price="6.00">6,00</div>
-        <div class="qtywrap" data-sku="MASKER">
-          <button class="qtybtn" data-action="dec">−</button>
-          <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
-          <button class="qtybtn" data-action="inc">+</button>
-        </div>
-        <div class="line" data-line="MASKER">0,00</div>
-      
+                <div>Masker</div>
+                <div class="price" data-price="6.00">6,00</div>
+                <div class="qtywrap" data-sku="MASKER">
+                    <button class="qtybtn" data-action="dec">−</button>
+                    <span class="qtyval" aria-live="polite">0</span>
+                    <button class="qtybtn" data-action="inc">+</button>
+                </div>
+                <div class="line" data-line="MASKER">0,00</div>
 
-      <div>Fles+vulling</div>
-        <div class="price" data-price="10.00">10,00</div>
-        <div class="qtywrap" data-sku="FLES">
-          <button class="qtybtn" data-action="dec">−</button>
-          <input class="qtyval" type="number" inputmode="numeric" min="0" step="1" value="0" />
-          <button class="qtybtn" data-action="inc">+</button>
-        </div>
-        <div class="line" data-line="FLES">0,00</div>
-      </div>
+                <div>Fles+vulling</div>
+                <div class="price" data-price="10.00">10,00</div>
+                <div class="qtywrap" data-sku="FLES">
+                    <button class="qtybtn" data-action="dec">−</button>
+                    <span class="qtyval" aria-live="polite">0</span>
+                    <button class="qtybtn" data-action="inc">+</button>
+                </div>
+                <div class="line" data-line="FLES">0,00</div>
 
-      <div class="totals">
-        <div class="label">Totaal (€):</div>
-        <div id="total" class="amount mono">€ 0,00</div>
-      </div>
-    </section>
+                <div>Duikcomputer</div>
+                <div class="price" data-price="5.00">5,00</div>
+                <div class="qtywrap" data-sku="COMPUTER">
+                    <button class="qtybtn" data-action="dec">−</button>
+                    <span class="qtyval" aria-live="polite">0</span>
+                    <button class="qtybtn" data-action="inc">+</button>
+                </div>
+                <div class="line" data-line="COMPUTER">0,00</div>
 
-    <!-- Ontvanger & QR -->
-    <section class="card grid">
-      <h2 style="margin:0">Ontvanger</h2>
-      <div class="grid" style="grid-template-columns:1fr 1fr; gap: var(--gap);">
-        <label>Rekeninghouder
-          <input id="benefName" type="text" value="IEPER DIVES" readonly="readonly" />
-        </label>
-        <label>IBAN
-          <input id="iban" class="mono" type="text" value="BE73001942760860" readonly="readonly" />
-        </label>
-        <label>BIC
-          <input id="bic" class="mono" type="text" value="GEBABEBB" readonly="readonly" />
-        </label>
-        <label>Mededeling
-          <input id="remit" type="text" placeholder="auto gegenereerd" />
-        </label>
-      </div>
-    </section>
+                <!-- CUSTOM ITEM -->
+                <div>
+                    <input id="customLabel" type="text" placeholder="Eigen item (bv. Duiklamp huur)" />
+                </div>
+                <div class="price">
+                    <input id="customPrice" type="number" inputmode="decimal" step="0.01" min="0" value="0.00" />
+                </div>
+                <div class="qtywrap" data-sku="CUSTOM" data-custom="1">
+                    <button class="qtybtn" data-action="dec" aria-label="verlaag">−</button>
+                    <span class="qtyval" aria-live="polite">0</span>
+                    <button class="qtybtn" data-action="inc" aria-label="verhoog">+</button>
+                </div>
+                <div class="line" data-line="CUSTOM">0,00</div>
+            </div>
 
-    <section class="card grid">
-      <h2 style="margin:0">Genereer QR</h2>
-      <div class="row">
-        <button id="btnGen" class="primary">Genereer Betaal-QR</button>
-        <button id="btnCopy" class="ghost">Kopieer EPC-payload</button>
-        <button id="btnSave" class="ghost">Download QR (PNG)</button>
-      </div>
+            <div class="totals">
+                <div class="label">Totaal (€):</div>
+                <div id="total" class="amount mono">€ 0,00</div>
+            </div>
+        </section>
 
-      <div class="qrwrap">
-        <div id="qrcode"></div>
-        <div class="grid" style="min-width: 300px;">
-          <div><strong>EPC-payload</strong></div>
-          <textarea id="payload" rows="10" class="mono" spellcheck="false" readonly></textarea>
-          <div class="small">Scanbaar in de meeste EU-bankapps (SCT).</div>
-        </div>
-      </div>
-    </section>
+        <!-- Opmerkingen -->
+        <section class="card grid">
+            <h2 style="margin:0">Opmerkingen (max. 200 tekens)</h2>
+            <textarea id="note" rows="4" maxlength="200" placeholder="Extra info voor de verkoper (optioneel)."></textarea>
+            <div class="count"><span id="noteCount">0</span>/200</div>
+        </section>
 
-    <footer class="small muted">
-      Tip: lang indrukken op +/− zorgt voor auto-repeat.
-    </footer>
-  </div>
-
-  <!-- Externe libs (onderaan body, juiste volgorde) -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-  <!-- App logic -->
-  <script>
-    // ===== Helpers =====
-    const eur = (n) => {
-      const safe = (isFinite(n) && !isNaN(n)) ? n : 0;
-      return new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(safe);
-    };
-    const dot2 = (n) => (Math.round((Number(n) + Number.EPSILON) * 100) / 100).toFixed(2);
-    const clamp = (v,min,max)=>Math.max(min,Math.min(max,Number.isFinite(v)?v:0));
-
-    // — parsing prijs uit data-price (robust)
-    function parsePrice(el){
-      // data-price moet in puntnotatie staan; fallback: innerText met komma → punt
-      const ds = el.getAttribute('data-price');
-      if (ds != null) {
-        const p = parseFloat(String(ds).replace(',','.'));
-        if (!isNaN(p)) return p;
-      }
-      const txt = el.textContent.trim().replace(/\./g,'').replace(',','.');
-      const p2 = parseFloat(txt);
-      return isNaN(p2) ? 0 : p2;
-    }
-
-    // UTF-8 utils voor QR
-    function byteLen(str){ return new TextEncoder().encode(str).length; }
-    function truncateBytes(str, maxBytes){
-      const enc = new TextEncoder();
-      let lo = 0, hi = str.length;
-      while (lo < hi){
-        const mid = (lo + hi + 1) >> 1;
-        if (enc.encode(str.slice(0, mid)).length <= maxBytes) lo = mid; else hi = mid - 1;
-      }
-      return str.slice(0, lo);
-    }
-    function toAsciiSafe(s){
-      return s
-        .normalize('NFKD').replace(/[\u0300-\u036f]/g,'') // accenten weg
-        .replace(/×/g,'x').replace(/[—–]/g,'-')           // speciale tekens
-        .replace(/[^\w\s\/\-\+\:\.\,]/g,'')               // rare symbolen
-        .replace(/\s+/g,' ').trim().toUpperCase();
-    }
-
-    // ===== Data uit DOM =====
-    const items = [];
-    document.querySelectorAll('.items .price').forEach(priceEl=>{
-      const label = priceEl.previousElementSibling.textContent.trim();
-      const price = parsePrice(priceEl); // robuust
-      const wrap  = priceEl.nextElementSibling;   // .qtywrap
-      const sku   = wrap.getAttribute('data-sku');
-      const input = wrap.querySelector('.qtyval');
-      items.push({ sku, label, price, input, lineEl: document.querySelector(`[data-line="${sku}"]`) });
-    });
-
-    // ===== Berekening + UI =====
-       
-    function updateLinesAndTotal() {
-      let total = 0;
-      for (const row of items) {
-        // Check if row.input is not null before accessing its value property
-        if (row.input) {
-          const qty = clamp(parseInt(row.input.value || '0', 10) || 0, 0, 999);
-          row.input.value = qty;
-          const line = qty * row.price;
-          total += (isFinite(line) && !isNaN(line)) ? line : 0;
-          // Check if row.lineEl exists before setting textContent
-          if (row.lineEl) {
-            row.lineEl.textContent = (line > 0 ? dot2(line).replace('.', ',') : '0,00');
-          } else {
-            // Handle the case where row.lineEl is null, e.g., log a warning or skip the row
-            console.warn('Skipping row due to missing line element:', row);
-          }
-        } else {
-          // Handle the case where row.input is null, e.g., log a warning or skip the row
-          console.warn('Skipping row due to missing input element:', row);
-        }
-      }
-      document.getElementById('total').textContent = eur(total);
-      document.getElementById('remit').placeholder = buildRemittance(true);
-      return total;
-    }
-
-    function bindQty() {
-      document.querySelectorAll('.qtywrap').forEach(wrap => {
-        const input = wrap.querySelector('.qtyval');
-        const dec = wrap.querySelector('[data-action="dec"]');
-        const inc = wrap.querySelector('[data-action="inc"]');
-        if (!input || !dec || !inc) return;
-    
-        const step = (delta) => {
-          const v = clamp((parseInt(input.value || '0', 10) || 0) + delta, 0, 999);
-          input.value = v;
-          updateLinesAndTotal();
-        };
-    
-        let holdTimer = null, repeatTimer = null;
-        const startHold = (delta) => {
-          step(delta);
-          holdTimer = setTimeout(() => {
-            repeatTimer = setInterval(() => step(delta), 70);
-          }, 350);
-        };
-        const endHold = () => {
-          clearTimeout(holdTimer);
-          clearInterval(repeatTimer);
-          holdTimer = repeatTimer = null;
-        };
-    
-        // --- PATCH ---
-        // Gebruik alleen pointer-events; géén 'click' meer (anders telt dubbel)
-        ['pointerdown'].forEach(evt => {
-          dec.addEventListener(evt, e => { e.preventDefault(); startHold(-1); });
-          inc.addEventListener(evt, e => { e.preventDefault(); startHold(1); });
-        });
-        ['pointerup', 'pointerleave', 'touchend', 'touchcancel', 'mouseup', 'mouseleave']
-          .forEach(evt => {
-            dec.addEventListener(evt, endHold);
-            inc.addEventListener(evt, endHold);
-          });
-    
-        // Handmatige invoer blijft
-        input.addEventListener('input', updateLinesAndTotal);
-        input.addEventListener('blur', () => {
-          input.value = clamp(parseInt(input.value || '0', 10) || 0, 0, 999);
-          updateLinesAndTotal();
-        });
-      });
-    }
-
-    // ===== Remittance + Payload =====
-    const MAX_REMIT_BYTES = 140;
-
-    function buildRemittance(asPlaceholder=false){
-      const parts = items.map(r=>{
-        // Check if r.input is not null before accessing r.input.value
-        const qty = parseInt(r.input ? r.input.value || '0' : '0', 10) || 0;
-        if (!qty) return null;
-        const base = r.label.split('(')[0].trim();
-        return `${base}x${qty}`; // ASCII 'x'
-      }).filter(Boolean);
+        <!-- Ontvanger & QR -->
+        <section class="card grid">
+            <h2 style="margin:0">Mededeling bank app</h2>
+            <div class="grid">
+                <label class="hide">
+                    Rekeninghouder
+                    <input id="benefName" type="text" value="IEPER DIVES" readonly />
+                </label>
+                <label class="hide">
+                    IBAN
+                    <input id="iban" class="mono" type="text" value="BE73001942760860" readonly />
+                </label>
+                <label class="hide">
+                    BIC
+                    <input id="bic" class="mono" type="text" value="GEBABEBB" readonly />
+                </label>
+                
+                    <textarea id="remit" type="text" placeholder="auto gegenereerd" readonly="readonly"></textarea>
+                
+            </div>
+        </section>
 
 
-      const ts = new Date().toISOString().slice(0,16).replace('T','').replace(':',''); // 202510132015
-      let text = (parts.length ? parts.join(' / ') : 'GEEN SELECTIE');
-      text = toAsciiSafe(text);
-      if (byteLen(text) > MAX_REMIT_BYTES) text = truncateBytes(text, MAX_REMIT_BYTES);
 
-      if (asPlaceholder) return text;
-      const manual = document.getElementById('remit').value.trim();
-      const chosen = manual ? toAsciiSafe(manual) : text;
-      return (byteLen(chosen) > MAX_REMIT_BYTES) ? truncateBytes(chosen, MAX_REMIT_BYTES) : chosen;
-    }
+        <section class="card grid">
+            <h2 style="margin:0">Genereer QR</h2>
+            <div class="row">
+                <button id="btnGen" class="primary">Genereer Betaal-QR</button>
+                <button id="btnShare" class="ghost">Deel QR</button>
+                <button id="btnCopy" class="ghost hide">Kopieer EPC-payload</button>
+                <button id="btnSave" class="ghost hide">Download QR (PNG)</button>
+            </div>
 
-    function buildEpcPayload({ name, iban, bic, amount, remittance }){
-      const lines = [
-        'BCD','001','1','SCT',
-        (bic||'').toUpperCase().trim(),
-        toAsciiSafe((name||'').slice(0,70)),
-        (iban||'').replace(/\s+/g,'').toUpperCase(),
-        'EUR'+dot2(amount||0),
-        '',
-        '',
-        remittance,
-        ''
-      ];
-      return lines.join('\n');
-    }
+            <div class="qrwrap">
+                <div id="qrcode"></div>
+                <div class="grid hide" style="min-width: 320px;">
+                    <div><strong>EPC-payload</strong></div>
+                    <textarea id="payload" rows="12" class="mono" spellcheck="false" readonly></textarea>
+                    <div class="small">Scanbaar in EU-bankapps (SCT). Mededeling wordt automatisch samengevat.</div>
+                </div>
+            </div>
+        </section>
 
-    function renderQR(payload){
-      const box = document.getElementById('qrcode');
-      box.innerHTML = '';
-      new QRCode(box, {
-        text: payload,
-        width: 256,
-        height: 256,
-        correctLevel: QRCode.CorrectLevel.L // maximale capaciteit
-      });
-    }
+        <footer class="small muted hide">
+            1 tik = 1 stap. Hou +/− ingedrukt voor sneller aanpassen.
+        </footer>
+    </div>
 
-    // ===== Actions =====
-    function generate(){
-      const total = updateLinesAndTotal();
-      const name = document.getElementById('benefName').value || 'DIVE RENTALS POC';
-      const iban = document.getElementById('iban').value || 'BE73001942760860';
-      const bic  = document.getElementById('bic').value  || 'GEBABEBB';
-      const rem  = buildRemittance(false);
+    <!-- Externe libs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="script.js"></script>
+    <script src="init.js"></script>
 
-      const payload = buildEpcPayload({ name, iban, bic, amount: total, remittance: rem });
-      document.getElementById('payload').value = payload;
-      renderQR(payload);
-    }
-
-    async function copyPayload(){
-      const txt = document.getElementById('payload').value;
-      if (!txt) return alert('Geen payload om te kopiëren. Genereer eerst de QR.');
-      try { await navigator.clipboard.writeText(txt); alert('Gekopieerd!'); }
-      catch { alert('Kopiëren mislukt. Selecteer en kopieer handmatig.'); }
-    }
-
-    function savePng(){
-      const c = document.querySelector('#qrcode canvas');
-      const img = document.querySelector('#qrcode img');
-      if (c){
-        const a = document.createElement('a');
-        a.download = 'betaal-qr.png';
-        a.href = c.toDataURL('image/png'); a.click();
-      } else if (img){
-        const a = document.createElement('a');
-        a.download = 'betaal-qr.png';
-        a.href = img.src; a.click();
-      } else {
-        alert('Genereer eerst de QR.');
-      }
-    }
-
-    // ===== Init =====
-    bindQty();
-    updateLinesAndTotal();
-    document.getElementById('btnGen').addEventListener('click', generate);
-    document.getElementById('btnCopy').addEventListener('click', copyPayload);
-    document.getElementById('btnSave').addEventListener('click', savePng);
-  </script>
 </body>
 </html>
