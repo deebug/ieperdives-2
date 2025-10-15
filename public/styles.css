@@ -1,36 +1,60 @@
+/* ===== Reset & basis ===== */
 :root {
-    --gap: 14px;
+    --gap: 8px; /* compacter dan voorheen */
+    --bg: #0b1220;
+    --panel: #10182b;
+    --ink: #eaf2ff;
+    --muted: #9db6ff;
+    --line: #263657;
+    --accent: #2d67ff;
 }
 
 * {
     box-sizing: border-box;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+html, body {
+    height: 100%;
 }
 
 body {
-    margin: 0;
-    padding: 24px;
-    background: #0b1220;
-    color: #eaf2ff;
+    margin: 0; /* geen buitenmarge */
+    padding: 0; /* geen body-padding */
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
+/* ===== App lay-out (rand-tot-rand) ===== */
 .app {
-    max-width: 980px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none; /* geen centrale max-width meer */
+    margin: 0; /* geen centers */
     display: grid;
-    gap: var(--gap);
+    gap: 0; /* geen “gaten” tussen secties */
 }
 
+/* Header strak */
 h1 {
-    margin: 0 0 6px;
-    font-size: 22px;
+    margin: 0;
+    font-size: 20px;
+    padding: 12px 14px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
 }
 
+header.grid {
+    gap: 0;
+}
+
+/* ===== Cards: vlak en compact ===== */
 .card {
-    background: #121a2c;
-    border: 1px solid #1f2a44;
-    border-radius: 12px;
-    padding: 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line); /* subtiele scheiding i.p.v. dikke border */
+    border-radius: 0; /* geen afgeronde hoeken voor strak gevoel */
+    padding: 12px 14px; /* compacte binnenruimte */
 }
 
 .grid {
@@ -38,22 +62,24 @@ h1 {
     gap: var(--gap);
 }
 
+/* ===== Items tabel ===== */
 .items {
     display: grid;
-    grid-template-columns: 1fr auto auto auto;
-    gap: 10px;
-    align-items: center
+    grid-template-columns: 1fr 84px auto 86px; /* artikel | prijs | qty | lijn */
+    align-items: center;
+    gap: 8px 10px;
 }
 
     .items > div {
         padding: 10px 0;
-        border-bottom: 1px dashed #28365b;
+        border-bottom: 1px dashed var(--line);
     }
 
     .items .hdr {
         font-weight: 600;
-        color: #bcd3ff;
-        border-bottom-color: #3a4f82;
+        color: var(--muted);
+        border-bottom-color: #31466f;
+        padding: 6px 0;
     }
 
 .price, .line {
@@ -61,49 +87,55 @@ h1 {
     font-variant-numeric: tabular-nums;
 }
 
+/* ===== Qty cluster ===== */
 .qtywrap {
     display: flex;
     align-items: center;
-    gap: 10px;
     justify-content: flex-end;
+    gap: 8px;
 }
 
 .qtybtn {
-    min-width: 44px;
-    min-height: 44px;
-    border-radius: 10px;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0;
+    border-radius: 12px;
     border: 1px solid #2a3d67;
     background: #0f1627;
-    color: #eaf2ff;
+    color: var(--ink);
     font-size: 22px;
     line-height: 1;
-    padding: 0 0 2px;
     touch-action: manipulation;
     user-select: none;
 }
 
 .qtyval {
-    min-width: 56px;
+    min-width: 60px;
     text-align: center;
     font-size: 20px;
     font-weight: 700;
-    border: 1px solid #2a3d67;
-    border-radius: 10px;
     padding: 10px 12px;
+    border: 1px solid #2a3d67;
+    border-radius: 12px;
     background: #0f1627;
-    color: #eaf2ff;
+    color: var(--ink);
     font-variant-numeric: tabular-nums;
 }
 
+/* ===== Totals volledig naar rechts ===== */
 .totals {
+    grid-column: 1 / -1; /* over volledige breedte van de grid */
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
     align-items: baseline;
+    gap: 8px;
+    padding-top: 8px;
+    margin-top: 4px;
+    border-top: 1px solid var(--line);
 }
 
     .totals .label {
-        color: #bcd3ff;
+        color: var(--muted);
     }
 
     .totals .amount {
@@ -111,22 +143,19 @@ h1 {
         font-weight: 700;
     }
 
-.row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
+/* ===== Form elementen ===== */
 input[type="text"], textarea {
     width: 100%;
 }
 
 input, button, textarea {
     background: #0f1627;
-    color: #eaf2ff;
+    color: var(--ink);
     border: 1px solid #2a3d67;
-    border-radius: 10px;
-    padding: 10px 12px;
+    border-radius: 12px;
+    padding: 12px 12px;
+    font-size: 18px; /* ≥16px voorkomt iOS auto-zoom */
+    line-height: 1.3;
 }
 
 button {
@@ -134,104 +163,92 @@ button {
 }
 
     button.primary {
-        background: #2d67ff;
-        border-color: #2d67ff;
-        color: white;
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
     }
 
     button.ghost {
         background: transparent;
     }
 
-.hide {display:none;}
+/* Actieknoppen compact in 1 lijn */
+.row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
 
+/* ===== QR blok ===== */
 .qrwrap {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     align-items: center;
     flex-wrap: wrap;
 }
 
 #qrcode {
-    background: white;
-    padding: 10px;
+    background: #fff;
+    padding: 8px;
     border-radius: 12px;
-}
-
-.small {
-    color: #9db6ff;
-    font-size: 12px;
+    border: 1px solid #e6e6e6;
 }
 
 .mono {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
-.muted {
-    color: #9db6ff;
-}
-
-.count {
+.small {
+    color: var(--muted);
     font-size: 12px;
-    color: #9db6ff;
-    text-align: right;
 }
 
+.muted {
+    color: var(--muted);
+}
+
+/* ===== Inputs in items-grid (custom rij) ===== */
+.items .price input {
+    width: 120px;
+    max-width: 38vw;
+    text-align: right;
+    padding: 10px 12px;
+}
+
+/* ===== Mobiel tuning ===== */
 @media (max-width: 640px) {
+    .card {
+        padding: 12px 10px;
+    }
+
     .items {
-        grid-template-columns: 1fr auto 1fr auto;
+        grid-template-columns: 1fr 74px auto 78px; /* iets smaller */
+        gap: 6px 8px;
+    }
+
+    .qtybtn {
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 20px;
+    }
+
+    .qtyval {
+        min-width: 56px;
+        font-size: 20px;
+        padding: 10px;
+    }
+
+    .row {
+        gap: 6px;
+    }
+
+    #qrcode {
+        padding: 6px;
     }
 }
 
-/* Custom prijsveld compact en rechts uitlijnen */
-.items .price input {
-    width: 110px;
-    text-align: right;
-}
-
-/* Labelveld mag voluit */
-#customLabel {
-    width: 100%;
-}
-
-/* iOS zoomt op inputs <16px; zet alles ≥16px */
-input, textarea, button, select {
-    font-size: 18px; /* >=16px voorkomt auto-zoom */
-    line-height: 1.3;
-    -webkit-text-size-adjust: 100%;
-}
-
-/* Custom label/price beter bruikbaar op mobiel */
-#customLabel {
-    width: 100%;
-    font-size: 18px;
-    padding: 14px 14px;
-    min-height: 48px;
-}
-
-#customPrice {
-    width: min(50vw, 200px); /* breder op mobiel */
-    text-align: right;
-    font-size: 18px;
-    padding: 12px 12px;
-    min-height: 48px;
-}
-
-/* In de items-grid staat het prijsveld in de 'price'-kolom – help met layout */
-.items .price input {
-    width: min(50vw, 200px);
-    text-align: right;
-}
-
-/* Zorg dat tap-targets groot zijn */
-.qtybtn {
-    min-width: 48px;
-    min-height: 48px;
-    font-size: 22px;
-}
-
-.qtyval {
-    min-width: 64px;
-    font-size: 22px;
-    padding: 12px 14px;
+/* ===== Visuele focus (toegankelijk) ===== */
+:focus-visible {
+    outline: 2px solid #77a2ff;
+    outline-offset: 2px;
 }
