@@ -307,3 +307,78 @@ function selectAllOnFocus(el) {
   // voorkom dat mouseup de selectie meteen weer wist
   el.addEventListener('mouseup', (e) => e.preventDefault());
 }
+
+
+// --- Helpers voor Blob ophalen uit QR (canvas of <img>)
+function dataUrlToBlob(dataUrl) {
+  const arr = dataUrl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]); let n = bstr.length; const u8 = new Uint8Array(n);
+  while (n--) u8[n] = bstr.charCodeAt(n);
+  return new Blob([u8], { type: mime });
+}
+
+async function getQrBlob() {
+  // Zorg dat er een QR is (zo niet: bouw hem snel)
+  let canvas = document.querySelector('#qrcode canvas');
+  let img = document.querySelector('#qrcode img');
+
+  if (!canvas && !img) {
+    generate();
+    await Promise.resolve(); // microtask, laat DOM updaten
+    canvas = document.querySelector('#qrcode canvas');
+    img = document.querySelector('#qrcode img');
+  }
+
+  if (canvas && canvas.toBlob) {
+    return new Promise((resolve) => canvas.toBlob(b => resolve(b), 'image/png'));
+  }
+  if (canvas) {
+    // zeer oud webkit: fallback via dataURL
+    return dataUrlToBlob(canvas.toDataURL('image/png'));
+  }
+  if (img && img.src?.startsWith('data:')) {
+    return dataUrlToBlob(img.src);
+  }
+  // laatste redmiddel: render payload opnieuw naar canvas en pak Blob
+  const payload = document.getElementById('payload')?.value || '';
+  if (!payload) return null;
+  const box = document.getElementById('qrcode');
+  box.innerHTML = '';
+  new QRCode(box, { text: payload, width: 512, height: 512, correctLevel: QRCode.CorrectLevel.L });
+  await Promise.resolve();
+  const c2 = document.querySelector('#qrcode canvas');
+  return c2 ? new Promise(res => c2.toBlob(b => res(b), 'image/png')) : null;
+}
+
+// --- Web Share API: deel PNG-bestand (WhatsApp/Messages/Mail, etc.)
+async function sharePngToWhatsApp() {
+  const blob = await getQrBlob();
+  if (!blob) { alert('Geen QR gevonden. Genereer eerst de QR.'); return; }
+
+  const file = new File([blob], 'betaal-qr.png', { type: 'image/png' });
+
+  // Best UX: echte image-share via systeem share sheet
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: 'Ieper Dives Betaal-QR',
+        text: 'SEPA QR voor betaling.'
+      });
+      return;
+    } catch (err) {
+      // user cancel of geen permissie → val door naar fallback
+    }
+  }
+
+  // Fallback: deelbare QR-link (tekst) zoals je al had
+  const payload = document.getElementById('payload')?.value || '';
+  if (!payload) { alert('Geen payload beschikbaar.'); return; }
+  const url = buildQrShareUrl(payload);
+  // Probeer nog tekst-share (zonder files)
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Ieper Dives Betaal-QR', text: url }); return; } catch {}
+  }
+  // WhatsApp web/app fallback
+  window.open('https://wa.me/?text=' + encodeURIComponent(url), '_blank');
+}
