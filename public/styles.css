@@ -124,10 +124,6 @@ header.grid {
 
 /* ===== Totals volledig naar rechts ===== */
 .totals {
-    grid-column: 1 / -1; /* over volledige breedte van de grid */
-    display: flex;
-    
-    gap: 8px;
     padding-top: 8px;
     margin-top: 4px;
     border-top: 1px solid var(--line);
