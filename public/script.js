@@ -178,21 +178,7 @@ function getQrDataUrl() {
     return null;
 }
 
-async function shareQrUrl() {
-    const payload = document.getElementById('payload').value;
-    if (!payload) { alert('Genereer eerst de QR.'); return; }
-    const url = buildQrShareUrl(payload, { size: 512, ec: 'L' });
 
-    if (navigator.share) {
-        try {
-            await navigator.share({ title: 'Ieper Dives Betaal-QR', url });
-            return;
-        } catch { /* user cancel of niet beschikbaar → fallback */ }
-    }
-    // Fallback: open WhatsApp met link
-    const wa = `https://wa.me/?text=${encodeURIComponent(url)}`;
-    window.open(wa, '_blank');
-}
 
 
 // --- b64url helpers voor URL-compacte payload ---
@@ -204,13 +190,25 @@ function str_to_b64u(str) {
 
 function buildQrShareUrl(payload, { size = 512, ec = 'L' } = {}) {
     const p = str_to_b64u(payload);
-    // Bouw absolute URL naar qr.html in dezelfde root
     const base = new URL(location.href);
-    const qrUrl = new URL('qr.html', base); // werkt ook als index.html op / staat
+    const qrUrl = new URL('qr.html', base);
     qrUrl.searchParams.set('p', p);
     qrUrl.searchParams.set('s', String(size));
     qrUrl.searchParams.set('e', ec);
     return qrUrl.toString();
+}
+
+async function copyQrLink() {
+  const payload = document.getElementById('payload').value;
+  if (!payload) return alert('Genereer eerst de QR.');
+  const url = buildQrShareUrl(payload);
+
+  try {
+    await navigator.clipboard.writeText(url);
+    alert('Link naar QR gekopieerd!\n\nJe kunt deze nu plakken in WhatsApp, e-mail, enz.');
+  } catch {
+    prompt('Kopieer deze link handmatig:', url);
+  }
 }
 
 function selectAllOnFocus(el) {
