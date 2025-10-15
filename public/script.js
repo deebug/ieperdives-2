@@ -178,42 +178,37 @@ function getQrDataUrl() {
     return null;
 }
 
-async function shareQR() {
-    // zorg dat er eerst een QR is
-    const dataUrl = getQrDataUrl();
-    if (!dataUrl) {
-        alert('Genereer eerst de QR.');
-        return;
-    }
+async function shareQrUrl() {
+    const payload = document.getElementById('payload').value;
+    if (!payload) { alert('Genereer eerst de QR.'); return; }
+    const url = buildQrShareUrl(payload, { size: 512, ec: 'L' });
 
-    // probeer eerst als afbeelding te delen (beste UX op mobiel → WhatsApp, Mail, etc.)
-    try {
-        const blob = await (await fetch(dataUrl)).blob();
-        const file = new File([blob], 'betaal-qr.png', { type: 'image/png' });
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: 'Ieper Dives Betaal-QR',
-                text: 'SEPA QR voor betaling.'
-            });
-            return;
-        }
-    } catch (_) {
-        // stilletjes door naar fallback
-    }
-
-    // Fallback: deel de EPC-payload als tekst (werkt met WhatsApp via wa.me)
-    const payload = document.getElementById('payload').value || '';
-    const text = encodeURIComponent(payload);
-    const waUrl = `https://wa.me/?text=${text}`;
-    // Probeer Web Share zonder files (sommige browsers ondersteunen enkel text/url)
     if (navigator.share) {
         try {
-            await navigator.share({ title: 'Ieper Dives Betaal-QR', text: payload });
+            await navigator.share({ title: 'Ieper Dives Betaal-QR', url });
             return;
-        } catch (_) { /* user cancelled of niet beschikbaar → ga door */ }
+        } catch { /* user cancel of niet beschikbaar → fallback */ }
     }
-    // Laatste redmiddel: open WhatsApp web / app met tekst
-    window.open(waUrl, '_blank');
+    // Fallback: open WhatsApp met link
+    const wa = `https://wa.me/?text=${encodeURIComponent(url)}`;
+    window.open(wa, '_blank');
+}
+
+
+// --- b64url helpers voor URL-compacte payload ---
+function str_to_b64u(str) {
+    // UTF-8 safe base64 → base64url
+    const b64 = btoa(unescape(encodeURIComponent(str)));
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '~'); // ~ als padding-marker
+}
+
+function buildQrShareUrl(payload, { size = 512, ec = 'L' } = {}) {
+    const p = str_to_b64u(payload);
+    // Bouw absolute URL naar qr.html in dezelfde root
+    const base = new URL(location.href);
+    const qrUrl = new URL('qr.html', base); // werkt ook als index.html op / staat
+    qrUrl.searchParams.set('p', p);
+    qrUrl.searchParams.set('s', String(size));
+    qrUrl.searchParams.set('e', ec);
+    return qrUrl.toString();
 }
