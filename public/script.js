@@ -212,3 +212,16 @@ function buildQrShareUrl(payload, { size = 512, ec = 'L' } = {}) {
     qrUrl.searchParams.set('e', ec);
     return qrUrl.toString();
 }
+
+function selectAllOnFocus(el) {
+    if (!el) return;
+    el.addEventListener('focus', () => {
+        // alleen selecteren als er wat staat
+        if (el.value && el.value.length) {
+            // kleine delay voorkomt dat 'focus' meteen ongedaan gemaakt wordt door 'mouseup' op iOS
+            setTimeout(() => el.select(), 0);
+        }
+    });
+    // voorkom dat mouseup de selectie meteen weer verwijdert
+    el.addEventListener('mouseup', (e) => e.preventDefault());
+}
