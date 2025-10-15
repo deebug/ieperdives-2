@@ -25,3 +25,7 @@ noteEl?.addEventListener('input', () => {
 
 // als iemand de mededeling manueel invult/wijzigt, direct meenemen in QR
 remitInput?.addEventListener('input', autoGen);
+
+document.getElementById('btnSharePng').addEventListener('click', () => {
+  sharePngToWhatsApp(); // geen preventDefault; iOS wil een 'echte' click
+});
