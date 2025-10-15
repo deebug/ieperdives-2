@@ -193,3 +193,45 @@ button {
 #customLabel {
     width: 100%;
 }
+
+/* iOS zoomt op inputs <16px; zet alles ≥16px */
+input, textarea, button, select {
+    font-size: 18px; /* >=16px voorkomt auto-zoom */
+    line-height: 1.3;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* Custom label/price beter bruikbaar op mobiel */
+#customLabel {
+    width: 100%;
+    font-size: 18px;
+    padding: 14px 14px;
+    min-height: 48px;
+}
+
+#customPrice {
+    width: min(50vw, 200px); /* breder op mobiel */
+    text-align: right;
+    font-size: 18px;
+    padding: 12px 12px;
+    min-height: 48px;
+}
+
+/* In de items-grid staat het prijsveld in de 'price'-kolom – help met layout */
+.items .price input {
+    width: min(50vw, 200px);
+    text-align: right;
+}
+
+/* Zorg dat tap-targets groot zijn */
+.qtybtn {
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 22px;
+}
+
+.qtyval {
+    min-width: 64px;
+    font-size: 22px;
+    padding: 12px 14px;
+}
