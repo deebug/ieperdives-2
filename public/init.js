@@ -15,6 +15,9 @@ const remitInput = document.getElementById('remit');
 customLabel?.addEventListener('input', autoGen);
 customPrice?.addEventListener('input', autoGen);
 
+selectAllOnFocus(customLabel);
+selectAllOnFocus(customPrice);
+
 noteEl?.addEventListener('input', () => {
   if (noteCount) noteCount.textContent = (noteEl.value || '').length;
   autoGen();

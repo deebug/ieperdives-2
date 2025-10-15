@@ -283,14 +283,27 @@ async function copyQrLink() {
 }
 
 function selectAllOnFocus(el) {
-    if (!el) return;
-    el.addEventListener('focus', () => {
-        // alleen selecteren als er wat staat
-        if (el.value && el.value.length) {
-            // kleine delay voorkomt dat 'focus' meteen ongedaan gemaakt wordt door 'mouseup' op iOS
-            setTimeout(() => el.select(), 0);
-        }
-    });
-    // voorkom dat mouseup de selectie meteen weer verwijdert
-    el.addEventListener('mouseup', (e) => e.preventDefault());
+  if (!el) return;
+  const isNumber = (el.type === 'number');
+
+  el.addEventListener('focus', () => {
+    // Workaround voor iOS/WebKit: number kan niet geselecteerd worden
+    if (isNumber) {
+      el.dataset._origType = 'number';
+      el.type = 'text';                // tijdelijk naar text
+      setTimeout(() => el.select(), 0);
+    } else {
+      if (el.value && el.value.length) setTimeout(() => el.select(), 0);
+    }
+  });
+
+  el.addEventListener('blur', () => {
+    if (el.dataset._origType === 'number') {
+      el.type = 'number';              // herstel type
+      delete el.dataset._origType;
+    }
+  });
+
+  // voorkom dat mouseup de selectie meteen weer wist
+  el.addEventListener('mouseup', (e) => e.preventDefault());
 }
