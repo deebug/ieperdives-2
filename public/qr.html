@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>QR</title>
+    <style>
+        :root {
+            --gap: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            background: #0b1220;
+            color: #eaf2ff;
+            display: grid;
+            place-items: center;
+            min-height: 100dvh;
+        }
+
+        .wrap {
+            display: grid;
+            gap: var(--gap);
+            align-items: center;
+            justify-items: center;
+            text-align: center;
+        }
+
+        #qr {
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button, a {
+            background: #0f1627;
+            color: #eaf2ff;
+            border: 1px solid #2a3d67;
+            border-radius: 10px;
+            padding: 10px 12px;
+            text-decoration: none;
+        }
+
+        .primary {
+            background: #2d67ff;
+            border-color: #2d67ff;
+            color: white;
+        }
+
+        .mono {
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        textarea {
+            width: min(92vw, 720px);
+            height: 160px;
+            background: #0f1627;
+            color: #eaf2ff;
+            border: 1px solid #2a3d67;
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .small {
+            color: #9db6ff;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div id="qr"></div>
+        <div class="row">
+            <a id="dl" class="primary" download="betaal-qr.png">Download PNG</a>
+            <button id="copy">Kopieer payload</button>
+        </div>
+        <details>
+            <summary>Toon payload</summary>
+            <textarea id="payload" class="mono" readonly></textarea>
+            <div class="small">Deze pagina bouwt enkel lokaal een PNG; er is geen server of tracking.</div>
+        </details>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+    // --- helpers voor b64url ---
+    const b64u_to_str = (s) => {
+      s = s.replace(/-/g,'+').replace(/_/g,'/').replace(/~/g,'=');
+      try { return decodeURIComponent(escape(atob(s))); } catch { return atob(s); }
+    };
+    // query lezen: p = payload (b64url), s = size (px), e = correctie (L/M/Q/H)
+    const params = new URLSearchParams(location.search);
+    const size = Math.max(64, Math.min(1024, parseInt(params.get('s')||'512',10)||512));
+    const ec   = ({L:'L',M:'M',Q:'Q',H:'H'}[String(params.get('e')||'L').toUpperCase()]||'L');
+
+    let payload = '';
+    if (params.has('p')) {
+      try { payload = b64u_to_str(params.get('p')); } catch(e){ payload = ''; }
+    } else if (params.has('t')) {
+      // fallback: plain URL-encoded tekst (minder compact)
+      payload = decodeURIComponent(params.get('t'));
+    } else {
+      payload = 'Geen payload ontvangen.';
+    }
+
+    // QR renderen
+    const box = document.getElementById('qr');
+    new QRCode(box, { text: payload, width: size, height: size, correctLevel: QRCode.CorrectLevel[ec] || QRCode.CorrectLevel.L });
+
+    // PNG link
+    function updateDownloadLink() {
+      const c = box.querySelector('canvas'); const img = box.querySelector('img');
+      const dataUrl = c ? c.toDataURL('image/png') : (img ? img.src : null);
+      if (dataUrl) document.getElementById('dl').href = dataUrl;
+    }
+    updateDownloadLink();
+
+    // payload tonen en kopiëren
+    document.getElementById('payload').value = payload;
+    document.getElementById('copy').addEventListener('click', async ()=>{
+      try { await navigator.clipboard.writeText(payload); alert('Payload gekopieerd!'); }
+      catch { alert('Kopiëren mislukt.'); }
+    });
+    </script>
+</body>
+</html>
