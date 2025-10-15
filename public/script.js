@@ -197,27 +197,52 @@ function getQrDataUrl() {
     return null;
 }
 
-// snellere copy helper (HTTPS/localhost: Clipboard API; anders fallback)
-async function copyTextFast(text) {
-  // moderne weg (vereist secure context + user gesture)
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(text);
-    return true;
-  }
-  // fallback: hidden textarea + execCommand
+// iOS-proof: eerst synchrone copy, daarna pas moderne API
+function copyTextFast(text) {
+  // 1) textarea fallback (sync)
   const ta = document.createElement('textarea');
   ta.value = text;
   ta.setAttribute('readonly', '');
   ta.style.position = 'fixed';
-  ta.style.top = '-9999px';
+  ta.style.opacity = '0';
+  ta.style.top = '0';
+  ta.style.left = '0';
   document.body.appendChild(ta);
+  ta.focus();
   ta.select();
   ta.setSelectionRange(0, ta.value.length);
   let ok = false;
   try { ok = document.execCommand('copy'); } catch { ok = false; }
   document.body.removeChild(ta);
-  return ok;
+  if (ok) return Promise.resolve(true);
+
+  // 2) contenteditable fallback (soms betrouwbaarder op oudere iOS)
+  const div = document.createElement('div');
+  div.contentEditable = 'true';
+  div.style.position = 'fixed';
+  div.style.opacity = '0';
+  div.style.top = '0';
+  div.style.left = '0';
+  div.textContent = text;
+  document.body.appendChild(div);
+  const range = document.createRange();
+  range.selectNodeContents(div);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try { ok = document.execCommand('copy'); } catch { ok = false; }
+  sel.removeAllRanges();
+  document.body.removeChild(div);
+  if (ok) return Promise.resolve(true);
+
+  // 3) moderne API (asynchroon) – werkt op iOS 16+ onder HTTPS, maar kan ‘NotAllowedError’ geven
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text).then(() => true).catch(() => false);
+  }
+  return Promise.resolve(false);
 }
+
+
 
 
 // --- b64url helpers voor URL-compacte payload ---
@@ -237,7 +262,6 @@ function buildQrShareUrl(payload, { size = 512, ec = 'L' } = {}) {
     return qrUrl.toString();
 }
 
-// vervang deze functie
 async function copyQrLink() {
   const payload = document.getElementById('payload').value;
   if (!payload) { alert('Genereer eerst de QR.'); return; }
@@ -245,23 +269,19 @@ async function copyQrLink() {
   const url = buildQrShareUrl(payload);
   const btn = document.getElementById('btnCopyLink');
 
-  try {
-    const ok = await copyTextFast(url);
-    if (!ok) throw new Error('copy failed');
-    // kleine visuele bevestiging
+  const ok = await copyTextFast(url);
+  if (ok) {
     if (btn) {
       const old = btn.textContent;
       btn.textContent = 'Link gekopieerd ✓';
       setTimeout(() => (btn.textContent = old), 1200);
-    } else {
-      // fallback bevestiging
-      alert('Link gekopieerd!');
     }
-  } catch {
-    // als echt niets lukt (zeer zeldzaam), toon dan nog één keer de link
-    alert('Kon de link niet automatisch kopiëren.\n\nLink:\n' + url);
+  } else {
+    // laatste redmiddel zonder prompt: toon korte melding
+    alert('Kon de link niet automatisch kopiëren. Tik lang in een invoerveld om te plakken.');
   }
 }
+
 function selectAllOnFocus(el) {
     if (!el) return;
     el.addEventListener('focus', () => {
