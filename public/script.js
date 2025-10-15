@@ -178,7 +178,27 @@ function getQrDataUrl() {
     return null;
 }
 
-
+// snellere copy helper (HTTPS/localhost: Clipboard API; anders fallback)
+async function copyTextFast(text) {
+  // moderne weg (vereist secure context + user gesture)
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return true;
+  }
+  // fallback: hidden textarea + execCommand
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.top = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  ta.setSelectionRange(0, ta.value.length);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch { ok = false; }
+  document.body.removeChild(ta);
+  return ok;
+}
 
 
 // --- b64url helpers voor URL-compacte payload ---
@@ -198,19 +218,31 @@ function buildQrShareUrl(payload, { size = 512, ec = 'L' } = {}) {
     return qrUrl.toString();
 }
 
+// vervang deze functie
 async function copyQrLink() {
   const payload = document.getElementById('payload').value;
-  if (!payload) return alert('Genereer eerst de QR.');
+  if (!payload) { alert('Genereer eerst de QR.'); return; }
+
   const url = buildQrShareUrl(payload);
+  const btn = document.getElementById('btnCopyLink');
 
   try {
-    await navigator.clipboard.writeText(url);
-    alert('Link naar QR gekopieerd!\n\nJe kunt deze nu plakken in WhatsApp, e-mail, enz.');
+    const ok = await copyTextFast(url);
+    if (!ok) throw new Error('copy failed');
+    // kleine visuele bevestiging
+    if (btn) {
+      const old = btn.textContent;
+      btn.textContent = 'Link gekopieerd ✓';
+      setTimeout(() => (btn.textContent = old), 1200);
+    } else {
+      // fallback bevestiging
+      alert('Link gekopieerd!');
+    }
   } catch {
-    prompt('Kopieer deze link handmatig:', url);
+    // als echt niets lukt (zeer zeldzaam), toon dan nog één keer de link
+    alert('Kon de link niet automatisch kopiëren.\n\nLink:\n' + url);
   }
 }
-
 function selectAllOnFocus(el) {
     if (!el) return;
     el.addEventListener('focus', () => {
