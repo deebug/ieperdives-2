@@ -87,10 +87,12 @@
 
                 <!-- CUSTOM ITEM -->
                 <div>
-                    <input id="customLabel" type="text" placeholder="Eigen item (bv. Duiklamp huur)" />
+                    <input id="customLabel" type="text" placeholder="Eigen/extra item"
+                           autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" />
                 </div>
                 <div class="price">
-                    <input id="customPrice" type="number" inputmode="decimal" step="0.01" min="0" value="0.00" />
+                    <input id="customPrice" type="number" inputmode="decimal" step="0.01" min="0" value="0.00"
+                           autocomplete="off" enterkeyhint="done" />
                 </div>
                 <div class="qtywrap" data-sku="CUSTOM" data-custom="1">
                     <button class="qtybtn" data-action="dec" aria-label="verlaag">−</button>
@@ -99,23 +101,22 @@
                 </div>
                 <div class="line" data-line="CUSTOM">0,00</div>
             </div>
-
             <div class="totals">
                 <div class="label">Totaal (€):</div>
                 <div id="total" class="amount mono">€ 0,00</div>
             </div>
-        </section>
+</section>
 
         <!-- Opmerkingen -->
         <section class="card grid">
             <h2 style="margin:0">Opmerkingen (max. 200 tekens)</h2>
-            <textarea id="note" rows="4" maxlength="200" placeholder="Extra info voor de verkoper (optioneel)."></textarea>
+            <textarea id="note" rows="4" maxlength="200" spellcheck="false" placeholder="Extra info voor de verkoper (optioneel)."></textarea>
             <div class="count"><span id="noteCount">0</span>/200</div>
         </section>
 
         <!-- Ontvanger & QR -->
         <section class="card grid">
-            <h2 style="margin:0">Mededeling bank app</h2>
+            <h2 style="margin:0">Mededeling bank app (alleen lezen)</h2>
             <div class="grid">
                 <label class="hide">
                     Rekeninghouder
@@ -130,7 +131,7 @@
                     <input id="bic" class="mono" type="text" value="GEBABEBB" readonly />
                 </label>
                 
-                    <textarea id="remit" type="text" placeholder="auto gegenereerd" readonly="readonly"></textarea>
+                    <textarea id="remit" rows="4" placeholder="auto gegenereerd" spellcheck="false" readonly></textarea>
                 
             </div>
         </section>
@@ -141,7 +142,7 @@
             <h2 style="margin:0">Genereer QR</h2>
             <div class="row">
                 <button id="btnGen" class="primary">Genereer Betaal-QR</button>
-                <button id="btnShare" class="ghost">Deel QR</button>
+                <button id="btnShareUrl" class="ghost">Deel link naar QR</button>
                 <button id="btnCopy" class="ghost hide">Kopieer EPC-payload</button>
                 <button id="btnSave" class="ghost hide">Download QR (PNG)</button>
             </div>
