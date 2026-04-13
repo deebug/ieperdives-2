@@ -139,14 +139,12 @@ export default function AdminDashboard() {
                         <p>Live Inventaris Aanpassen</p>
                     </div>
                 </div>
-                <button onClick={handleSave} disabled={isLoading} style={{background: 'var(--accent)', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', cursor: 'pointer'}}>
-                    <Save size={16}/> Save
+                <button onClick={handleSave} disabled={isLoading} style={{background: statusText.includes('Opgeslagen') ? '#34c759' : (statusText.includes('Fout') ? '#ff3b30' : 'var(--accent)'), border: 'none', color: 'white', padding: '8px 16px', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.2, 0, 0, 1)', whiteSpace: 'nowrap'}}>
+                    <Save size={16}/> {statusText || 'Save'}
                 </button>
             </header>
 
             <main className="scrollable-content" style={{paddingBottom: '40px'}}>
-                {statusText && <div style={{background: 'rgba(10, 132, 255, 0.2)', padding: '12px', borderRadius: '8px', textAlign: 'center', marginBottom: '16px', fontWeight: 'bold'}}>{statusText}</div>}
-                
                 <DragDropContext onDragEnd={onDragEnd}>
                     <Droppable droppableId="items">
                         {(provided) => (
