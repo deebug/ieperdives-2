@@ -69,6 +69,7 @@ export default function Home() {
         setCustomPrice('');
         setNote('');
         setShowClearSheet(false);
+        setShowQrSheet(false);
         if(window.navigator?.vibrate) window.navigator.vibrate(50);
     };
     
@@ -277,6 +278,7 @@ export default function Home() {
 
                     <div className="sheet-actions">
                         <button className="btn-action" onClick={handleShare}><Share size={18} /> Delen</button>
+                        <button className="btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={clearAll}>Klaar & Wis</button>
                     </div>
                 </div>
             </div>
