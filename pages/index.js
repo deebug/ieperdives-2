@@ -22,6 +22,29 @@ function truncBytes(s, max) {
     return s.slice(0, lo);
 }
 
+const useLongPress = (callback) => {
+    const timerRef = useRef();
+    const intervalRef = useRef();
+    const cbRef = useRef(callback);
+    useEffect(() => { cbRef.current = callback; }, [callback]);
+    
+    const start = useCallback((e) => {
+        if(e) e.preventDefault();
+        cbRef.current();
+        timerRef.current = setTimeout(() => { intervalRef.current = setInterval(() => cbRef.current(), 70); }, 350);
+    }, []);
+    const end = useCallback(() => { clearTimeout(timerRef.current); clearInterval(intervalRef.current); }, []);
+    return {
+        onPointerDown: start,
+        onPointerUp: end, onPointerLeave: end, onTouchEnd: end, onTouchCancel: end, onMouseUp: end, onMouseLeave: end
+    };
+};
+
+function QtyButton({ onClick, children }) {
+    const handlers = useLongPress(onClick);
+    return <button className="qtybtn" {...handlers}>{children}</button>;
+}
+
 export default function Home() {
     const [dbItems, setDbItems] = useState([
         { sku: 'UITRUSTING', title: 'Volledige uitrusting', price: 30, pos: 1 },
@@ -107,20 +130,7 @@ export default function Home() {
         });
     }, []);
 
-    // Long press logic mapping
-    const useLongPress = (callback) => {
-        const timerRef = useRef();
-        const intervalRef = useRef();
-        const start = () => {
-            callback();
-            timerRef.current = setTimeout(() => { intervalRef.current = setInterval(callback, 70); }, 350);
-        };
-        const end = () => { clearTimeout(timerRef.current); clearInterval(intervalRef.current); };
-        return {
-            onPointerDown: (e) => { e.preventDefault(); start(); },
-            onPointerUp: end, onPointerLeave: end, onTouchEnd: end, onTouchCancel: end, onMouseUp: end, onMouseLeave: end
-        };
-    };
+    // Hook moved to outer scope to prevent loop hook violation
 
     const cPriceVal = Math.max(0, parseFloat((customPrice||"0").replace(',','.')) || 0);
 
@@ -214,9 +224,9 @@ export default function Home() {
                                     <div className="item-price">€{dot2(item.price)} /st.</div>
                                 </div>
                                 <div className="qtywrap">
-                                    <button className="qtybtn" {...useLongPress(() => updateCount(item.sku, -1))}><Minus size={16} /></button>
+                                    <QtyButton onClick={() => updateCount(item.sku, -1)}><Minus size={16} /></QtyButton>
                                     <span className="qtyval">{q}</span>
-                                    <button className="qtybtn" {...useLongPress(() => updateCount(item.sku, 1))}><Plus size={16} /></button>
+                                    <QtyButton onClick={() => updateCount(item.sku, 1)}><Plus size={16} /></QtyButton>
                                 </div>
                             </div>
                         )
@@ -232,9 +242,9 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="qtywrap">
-                            <button className="qtybtn" {...useLongPress(() => updateCustomCount(-1))}><Minus size={16}/></button>
+                            <QtyButton onClick={() => updateCustomCount(-1)}><Minus size={16}/></QtyButton>
                             <span className="qtyval">{customCount}</span>
-                            <button className="qtybtn" {...useLongPress(() => updateCustomCount(1))}><Plus size={16}/></button>
+                            <QtyButton onClick={() => updateCustomCount(1)}><Plus size={16}/></QtyButton>
                         </div>
                     </div>
 
