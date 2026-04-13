@@ -14,7 +14,7 @@ export default function AdminDashboard() {
 
     const loadItems = async () => {
         try {
-            const res = await fetch('/api/items');
+            const res = await fetch('/api/items?t=' + Date.now(), { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
                 // Sorteer op positie (pos)
@@ -136,7 +136,6 @@ export default function AdminDashboard() {
                     </NextLink>
                     <div className="header-content" style={{gap: '4px'}}>
                         <h1 style={{fontSize: '20px'}}>Beheer</h1>
-                        <p>Live Inventaris Aanpassen</p>
                     </div>
                 </div>
                 <button onClick={handleSave} disabled={isLoading} style={{background: statusText.includes('Opgeslagen') ? '#34c759' : (statusText.includes('Fout') ? '#ff3b30' : 'var(--accent)'), border: 'none', color: 'white', padding: '8px 16px', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.2, 0, 0, 1)', whiteSpace: 'nowrap'}}>
