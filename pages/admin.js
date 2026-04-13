@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { Save, Plus, Trash2, GripVertical, Lock } from 'lucide-react';
+import NextLink from 'next/link';
+import { Save, Plus, Trash2, GripVertical, Lock, Home } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 export default function AdminDashboard() {
     const [pin, setPin] = useState('');
@@ -74,11 +76,12 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleDrop = (dropIndex) => {
-        if (draggedIdx === null || draggedIdx === dropIndex) return;
+    const onDragEnd = (result) => {
+        if (!result.destination) return;
+        if (result.source.index === result.destination.index) return;
         const newItems = [...items];
-        const [moved] = newItems.splice(draggedIdx, 1);
-        newItems.splice(dropIndex, 0, moved);
+        const [moved] = newItems.splice(result.source.index, 1);
+        newItems.splice(result.destination.index, 0, moved);
         // Herbereken posities lineair zodat opslaan klopt
         newItems.forEach((item, idx) => item.pos = idx + 1);
         setItems(newItems);
@@ -124,9 +127,14 @@ export default function AdminDashboard() {
         <div className="app-shell">
             <Head><title>Database Admin</title></Head>
             <header className="glass-header" style={{justifyContent: 'space-between', alignItems: 'center'}}>
-                <div className="header-content" style={{gap: '4px'}}>
-                    <h1 style={{fontSize: '20px'}}>Database Beheer</h1>
-                    <p>Live Inventaris Aanpassen</p>
+                <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                    <NextLink href="/" style={{background: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)', padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <Home size={20} />
+                    </NextLink>
+                    <div className="header-content" style={{gap: '4px'}}>
+                        <h1 style={{fontSize: '20px'}}>Database Beheer</h1>
+                        <p>Live Inventaris Aanpassen</p>
+                    </div>
                 </div>
                 <button onClick={handleSave} disabled={isLoading} style={{background: 'var(--accent)', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', cursor: 'pointer'}}>
                     <Save size={16}/> Save
@@ -136,45 +144,54 @@ export default function AdminDashboard() {
             <main className="scrollable-content" style={{paddingBottom: '40px'}}>
                 {statusText && <div style={{background: 'rgba(10, 132, 255, 0.2)', padding: '12px', borderRadius: '8px', textAlign: 'center', marginBottom: '16px', fontWeight: 'bold'}}>{statusText}</div>}
                 
-                <div className="items-list">
-                    {items.map((item, i) => (
-                        <div 
-                            key={item.sku} 
-                            className="item-card" 
-                            draggable
-                            onDragStart={(e) => { setDraggedIdx(i); e.dataTransfer.effectAllowed = 'move'; }}
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={() => handleDrop(i)}
-                            onDragEnd={() => setDraggedIdx(null)}
-                            style={{
-                                flexDirection: 'column', alignItems: 'stretch', gap: '12px', padding: '16px',
-                                opacity: draggedIdx === i ? 0.5 : 1,
-                                cursor: 'move'
-                            }}
-                        >
-                            
-                            <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
-                                <div style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '8px', flexShrink: 0}}><GripVertical size={16}/></div>
-                                <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '4px'}}>
-                                    <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase'}}>Naam</label>
-                                    <input className="clean-input" style={{fontSize: '18px', fontWeight: 'bold'}} value={item.title} onChange={e => handleChange(i, 'title', e.target.value)} />
-                                </div>
-                                <button onClick={() => handleDelete(i)} style={{background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '8px'}}><Trash2 size={20}/></button>
-                            </div>
+                <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="items">
+                        {(provided) => (
+                            <div className="items-list" {...provided.droppableProps} ref={provided.innerRef}>
+                                {items.map((item, i) => (
+                                    <Draggable key={item.sku} draggableId={item.sku} index={i}>
+                                        {(provided, snapshot) => (
+                                            <div 
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                className="item-card" 
+                                                style={{
+                                                    flexDirection: 'column', alignItems: 'stretch', gap: '12px', padding: '16px',
+                                                    background: snapshot.isDragging ? 'var(--bg-glass-heavy)' : 'var(--bg-surface)',
+                                                    opacity: snapshot.isDragging ? 0.9 : 1,
+                                                    boxShadow: snapshot.isDragging ? 'var(--shadow-glow)' : 'none',
+                                                    ...provided.draggableProps.style,
+                                                }}
+                                            >
+                                                
+                                                <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
+                                                    <div {...provided.dragHandleProps} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '8px', flexShrink: 0}}><GripVertical size={16}/></div>
+                                                    <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                                                        <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase'}}>Naam</label>
+                                                        <input className="clean-input" style={{fontSize: '18px', fontWeight: 'bold'}} value={item.title} onChange={e => handleChange(i, 'title', e.target.value)} />
+                                                    </div>
+                                                    <button onClick={() => handleDelete(i)} style={{background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '8px'}}><Trash2 size={20}/></button>
+                                                </div>
 
-                            <div style={{display: 'flex', gap: '16px', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px'}}>
-                                <div style={{flex: 1}}>
-                                    <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '4px'}}>Positie (Volgorde)</label>
-                                    <input className="clean-input" type="number" value={item.pos} onChange={e => handleChange(i, 'pos', e.target.value)} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px'}}/>
-                                </div>
-                                <div style={{flex: 1}}>
-                                    <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '4px'}}>Prijs (€)</label>
-                                    <input className="clean-input" type="number" step="0.01" value={item.price} onChange={e => handleChange(i, 'price', e.target.value)} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px'}}/>
-                                </div>
+                                                <div style={{display: 'flex', gap: '16px', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px'}}>
+                                                    <div style={{flex: 1}}>
+                                                        <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '4px'}}>Positie (Volgorde)</label>
+                                                        <input className="clean-input" type="number" value={item.pos} onChange={e => handleChange(i, 'pos', e.target.value)} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px'}}/>
+                                                    </div>
+                                                    <div style={{flex: 1}}>
+                                                        <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '4px'}}>Prijs (€)</label>
+                                                        <input className="clean-input" type="number" step="0.01" value={item.price} onChange={e => handleChange(i, 'price', e.target.value)} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px'}}/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        )}
+                    </Droppable>
+                </DragDropContext>
 
                 <div style={{display: 'flex', justifyContent: 'center', marginTop: '24px'}}>
                     <button onClick={handleAddNew} style={{background: 'transparent', border: '1px dashed var(--border-glass)', color: 'var(--text-primary)', padding: '16px 24px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', cursor: 'pointer', width: '100%', justifyContent: 'center'}}>
