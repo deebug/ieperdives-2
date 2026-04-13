@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Head from 'next/head';
+import NextLink from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
-import { Minus, Plus, Share, Link, Download } from 'lucide-react';
+import { Minus, Plus, Share, Link, Download, Settings } from 'lucide-react';
 
 
 
@@ -44,7 +45,7 @@ export default function Home() {
 
     const [counts, setCounts] = useState({});
     const [customLabel, setCustomLabel] = useState("");
-    const [customPrice, setCustomPrice] = useState("0");
+    const [customPrice, setCustomPrice] = useState("");
     const [customCount, setCustomCount] = useState(0);
     const [note, setNote] = useState("");
     
@@ -176,6 +177,9 @@ export default function Home() {
                     <h1>Ieper Dives</h1>
                     <p>Quick Checkout</p>
                 </div>
+                <NextLink href="/admin" aria-label="Admin Dashboard" style={{ position: 'absolute', right: '24px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', padding: '8px', display: 'flex' }}>
+                    <Settings size={22} />
+                </NextLink>
             </header>
 
             <main className="scrollable-content">
@@ -202,7 +206,7 @@ export default function Home() {
                             <input value={customLabel} onChange={e => setCustomLabel(e.target.value)} type="text" className="clean-input" placeholder="Custom Item" />
                             <div className="custom-price-wrapper">
                                 <span>€</span>
-                                <input value={customPrice} onChange={e => setCustomPrice(e.target.value)} type="number" step="0.01" min="0" className="clean-input price-input" />
+                                <input value={customPrice} onChange={e => setCustomPrice(e.target.value)} onFocus={e => e.target.select()} type="number" step="0.01" min="0" className="clean-input price-input" placeholder="0.00" />
                             </div>
                         </div>
                         <div className="qtywrap">
