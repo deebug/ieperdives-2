@@ -61,7 +61,7 @@ export default function AdminDashboard() {
     const handleChange = (index, field, value) => {
         const newItems = [...items];
         if (field === 'price' || field === 'pos') {
-            newItems[index][field] = Number(value);
+            newItems[index][field] = value === '' ? '' : Number(value);
         } else {
             newItems[index][field] = value;
         }
@@ -91,8 +91,8 @@ export default function AdminDashboard() {
         const maxPos = items.length > 0 ? Math.max(...items.map(i => i.pos || 0)) : 0;
         setItems([...items, { 
             sku: 'NIEUW_' + Math.floor(Math.random()*1000), 
-            title: 'Nieuw Item', 
-            price: 10, 
+            title: '', 
+            price: '', 
             pos: maxPos + 1 
         }]);
     };
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
                                                     <div {...provided.dragHandleProps} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '8px', flexShrink: 0}}><GripVertical size={16}/></div>
                                                     <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '4px'}}>
                                                         <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase'}}>Naam</label>
-                                                        <input className="clean-input" style={{fontSize: '18px', fontWeight: 'bold'}} value={item.title} onChange={e => handleChange(i, 'title', e.target.value)} />
+                                                        <input className="clean-input" style={{fontSize: '18px', fontWeight: 'bold'}} placeholder="Nieuw Item" value={item.title} onChange={e => handleChange(i, 'title', e.target.value)} />
                                                     </div>
                                                     <button onClick={() => handleDelete(i)} style={{background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '8px'}}><Trash2 size={20}/></button>
                                                 </div>
@@ -179,11 +179,11 @@ export default function AdminDashboard() {
                                                 <div style={{display: 'flex', gap: '16px', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px'}}>
                                                     <div style={{flex: 1}}>
                                                         <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '4px'}}>Positie (Volgorde)</label>
-                                                        <input className="clean-input" type="number" value={item.pos} onChange={e => handleChange(i, 'pos', e.target.value)} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px'}}/>
+                                                        <input className="clean-input" type="number" inputMode="numeric" placeholder="1" onFocus={e => e.target.select()} value={item.pos} onChange={e => handleChange(i, 'pos', e.target.value)} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px'}}/>
                                                     </div>
                                                     <div style={{flex: 1}}>
                                                         <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '4px'}}>Prijs (€)</label>
-                                                        <input className="clean-input" type="number" step="0.01" value={item.price} onChange={e => handleChange(i, 'price', e.target.value)} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px'}}/>
+                                                        <input className="clean-input" type="number" inputMode="decimal" step="0.01" placeholder="0.00" onFocus={e => e.target.select()} value={item.price} onChange={e => handleChange(i, 'price', e.target.value)} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px'}}/>
                                                     </div>
                                                 </div>
                                             </div>
