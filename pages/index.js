@@ -121,6 +121,7 @@ export default function Home() {
     const clearQuantities = () => {
         setCounts({});
         setCustomCount(0);
+        setNote('');
         setShowClearSheet(false);
         setShowQrSheet(false);
         if(window.navigator?.vibrate) window.navigator.vibrate(50);
