@@ -12,6 +12,10 @@ export default function AdminDashboard() {
     const [isLoading, setIsLoading] = useState(false);
     const [statusText, setStatusText] = useState('');
     const [draggedIdx, setDraggedIdx] = useState(null);
+    const [iconPickerIdx, setIconPickerIdx] = useState(null);
+    const [iconSearch, setIconSearch] = useState('');
+
+    const filteredIcons = iconSearch ? ICON_NAMES.filter(n => n.toLowerCase().includes(iconSearch.toLowerCase())).slice(0, 100) : ICON_NAMES.slice(0, 150);
 
     const loadItems = async () => {
         try {
@@ -188,28 +192,29 @@ export default function AdminDashboard() {
                                                     </div>
                                                 </div>
 
-                                                <div style={{background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px'}}>
-                                                    <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '8px'}}>Icoon & Kleuren</label>
-                                                    <div style={{display: 'flex', gap: '16px', marginBottom: '12px'}}>
-                                                        <div style={{flex: 1, display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                                            <input type="color" value={item.bgColor || '#1c1c1e'} onChange={e => handleChange(i, 'bgColor', e.target.value)} style={{width: '32px', height: '32px', border: 'none', padding: 0, borderRadius: '4px', cursor: 'pointer', background: 'transparent'}}/>
-                                                            <span style={{fontSize: '12px', color: 'var(--text-secondary)'}}>Achtergrond</span>
-                                                        </div>
-                                                        <div style={{flex: 1, display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                                            <input type="color" value={item.fgColor || '#0a84ff'} onChange={e => handleChange(i, 'fgColor', e.target.value)} style={{width: '32px', height: '32px', border: 'none', padding: 0, borderRadius: '4px', cursor: 'pointer', background: 'transparent'}}/>
-                                                            <span style={{fontSize: '12px', color: 'var(--text-secondary)'}}>Voorgrond</span>
-                                                        </div>
+                                                <div style={{background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px', display: 'flex', gap: '16px'}}>
+                                                    <div style={{flex: 1}}>
+                                                        <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '8px'}}>Kies Icoon</label>
+                                                        <button
+                                                            onClick={(e) => { e.preventDefault(); setIconPickerIdx(i); }}
+                                                            style={{background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-glass)', borderRadius: '8px', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', cursor: 'pointer', width: '100%'}}
+                                                        >
+                                                            {(() => {
+                                                                const CurrIcon = ICONS[item.icon || 'Box'] || ICONS['Box'];
+                                                                return <CurrIcon size={20} />;
+                                                            })()}
+                                                            <span style={{overflow: 'hidden', textOverflow: 'ellipsis'}}>{item.icon || 'Box'}</span>
+                                                        </button>
                                                     </div>
-                                                    <div style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'auto', gap: '8px', paddingBottom: '4px'}}>
-                                                        {ICON_NAMES.map(name => {
-                                                            const IconComp = ICONS[name];
-                                                            const isSelected = (item.icon || 'Box') === name;
-                                                            return (
-                                                                <div key={name} onClick={() => handleChange(i, 'icon', name)} style={{padding: '8px', borderRadius: '8px', background: isSelected ? 'var(--bg-glass-heavy)' : 'rgba(255,255,255,0.05)', border: isSelected ? '1px solid var(--accent)' : '1px solid transparent', cursor: 'pointer', flexShrink: 0}}>
-                                                                    <IconComp size={20} color={isSelected ? 'var(--accent)' : 'var(--text-secondary)'} />
-                                                                </div>
-                                                            )
-                                                        })}
+                                                    <div style={{flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '8px'}}>
+                                                        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                                            <input type="color" value={item.bgColor || '#1c1c1e'} onChange={e => handleChange(i, 'bgColor', e.target.value)} style={{width: '24px', height: '24px', border: 'none', padding: 0, borderRadius: '4px', cursor: 'pointer', background: 'transparent'}}/>
+                                                            <span style={{fontSize: '11px', color: 'var(--text-secondary)'}}>Achtergrond</span>
+                                                        </div>
+                                                        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                                            <input type="color" value={item.fgColor || '#0a84ff'} onChange={e => handleChange(i, 'fgColor', e.target.value)} style={{width: '24px', height: '24px', border: 'none', padding: 0, borderRadius: '4px', cursor: 'pointer', background: 'transparent'}}/>
+                                                            <span style={{fontSize: '11px', color: 'var(--text-secondary)'}}>Voorgrond</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -228,6 +233,53 @@ export default function AdminDashboard() {
                     </button>
                 </div>
             </main>
+
+            {iconPickerIdx !== null && (
+                <div className={`sheet-overlay active`} onClick={(e) => { if(e.target === e.currentTarget) { setIconPickerIdx(null); setIconSearch(''); } }}>
+                    <div className="bottom-sheet" style={{height: '75vh', display: 'flex', flexDirection: 'column', paddingTop: '16px'}}>
+                        <div className="sheet-handle-wrap" onClick={() => { setIconPickerIdx(null); setIconSearch(''); }}><div className="sheet-handle"></div></div>
+                        <h2 className="sheet-title" style={{marginTop: '0'}}>Kies Pictogram</h2>
+                        
+                        <div style={{padding: '0 24px 16px'}}>
+                            <input 
+                                type="text" 
+                                placeholder="Zoek op Engelse label (bijv. 'coffee')" 
+                                value={iconSearch}
+                                onChange={e => setIconSearch(e.target.value)}
+                                className="clean-input"
+                                style={{background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '12px', width: '100%', fontSize: '16px'}}
+                            />
+                        </div>
+
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 24px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(64px, 1fr))', gap: '12px' }}>
+                                {filteredIcons.map(name => {
+                                    const IconComp = ICONS[name];
+                                    if (!IconComp) return null;
+                                    const isSelected = items[iconPickerIdx]?.icon === name;
+                                    return (
+                                        <div 
+                                            key={name}
+                                            onClick={() => { handleChange(iconPickerIdx, 'icon', name); setIconPickerIdx(null); setIconSearch(''); }}
+                                            style={{
+                                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                                                padding: '12px 8px', borderRadius: '12px',
+                                                background: isSelected ? 'var(--bg-glass-heavy)' : 'rgba(255,255,255,0.02)',
+                                                border: isSelected ? '1px solid var(--accent)' : '1px solid transparent',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            <IconComp size={24} color={isSelected ? 'var(--accent)' : 'var(--text-primary)'} />
+                                            <span style={{fontSize: '9px', color: 'var(--text-secondary)', textAlign: 'center', wordBreak: 'break-all'}}>{name}</span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            {filteredIcons.length === 0 && <p style={{textAlign: 'center', color: 'var(--text-secondary)', marginTop: '24px'}}>Geen icoon gevonden</p>}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
