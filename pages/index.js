@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
-import { Minus, Plus, Share, Link, Download, Settings, Trash2 } from 'lucide-react';
+import { Minus, Plus, Share, Link, Download, Settings, Trash2, RefreshCw } from 'lucide-react';
 
 
 
@@ -55,16 +55,55 @@ export default function Home() {
         { sku: 'DUIKPAK', title: 'Duikpak', price: 10, pos: 6 },
     ]);
     
-    useEffect(() => {
-        fetch('/api/items?t=' + Date.now(), { cache: 'no-store' })
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.length) {
-                    setDbItems(data.sort((a,b) => (a.pos || 0) - (b.pos || 0)));
-                }
-            })
-            .catch(console.error);
-    }, []);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [pullY, setPullY] = useState(0);
+    const startY = useRef(0);
+
+    const fetchItems = async () => {
+        try {
+            const res = await fetch('/api/items?t=' + Date.now(), { cache: 'no-store' });
+            const data = await res.json();
+            if (data && data.length) {
+                setDbItems(data.sort((a,b) => (a.pos || 0) - (b.pos || 0)));
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    useEffect(() => { fetchItems(); }, []);
+
+    const handleTouchStart = (e) => {
+        if (e.currentTarget.scrollTop <= 0) {
+            startY.current = e.touches[0].clientY;
+        } else {
+            startY.current = 0;
+        }
+    };
+    
+    const handleTouchMove = (e) => {
+        if (startY.current > 0) {
+            const dy = e.touches[0].clientY - startY.current;
+            if (dy > 0) {
+                let resY = dy;
+                if(dy > 80) resY = 80 + (dy - 80)*0.2; 
+                setPullY(resY);
+            } else {
+                setPullY(0);
+            }
+        }
+    };
+    
+    const handleTouchEnd = async () => {
+        if (pullY > 60 && !isRefreshing) {
+            setIsRefreshing(true);
+            setPullY(60); 
+            if(window.navigator?.vibrate) window.navigator.vibrate(10);
+            await fetchItems();
+            setTimeout(() => { setIsRefreshing(false); setPullY(0); }, 400);
+        } else {
+            setPullY(0);
+        }
+        startY.current = 0;
+    };
 
     const [counts, setCounts] = useState({});
     const [customLabel, setCustomLabel] = useState("");
@@ -213,7 +252,20 @@ export default function Home() {
                 </NextLink>
             </header>
 
-            <main className="scrollable-content">
+            <main 
+                className="scrollable-content"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+            >
+                <div style={{
+                    height: `${isRefreshing ? 60 : pullY}px`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: (isRefreshing || pullY === 0) ? 'height 0.3s cubic-bezier(0.2, 0, 0, 1)' : 'none',
+                    overflow: 'hidden'
+                }}>
+                    <RefreshCw size={24} color="var(--accent)" className={isRefreshing ? 'spin-anim' : ''} style={{ transform: `rotate(${pullY * 3}deg)`, opacity: isRefreshing ? 1 : Math.min(1, pullY / 50) }} />
+                </div>
                 <div className="items-list">
                     {dbItems.map(item => {
                         const q = counts[item.sku] || 0;
