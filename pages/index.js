@@ -186,7 +186,7 @@ export default function Home() {
         });
         if (customCount > 0) {
             t += customCount * cPriceVal;
-            parts.push(`${customLabel.trim() || 'CUSTOM'} x ${customCount}`);
+            parts.push(`${customLabel.trim() || 'EXTRA ITEM'} x ${customCount}`);
         }
 
         let r = parts.length ? parts.join(' / ') : 'GEEN SELECTIE';
@@ -299,7 +299,7 @@ export default function Home() {
                             <Plus size={20} color="var(--text-secondary)" />
                         </div>
                         <div className="item-info" style={{ flex: 1 }}>
-                            <input value={customLabel} onChange={e => setCustomLabel(e.target.value)} type="text" className="clean-input item-title" placeholder="Custom Item" style={{ padding: 0 }} />
+                            <input value={customLabel} onChange={e => setCustomLabel(e.target.value)} type="text" className="clean-input item-title" placeholder="Extra item" style={{ padding: 0 }} />
                             <div style={{ display: 'flex', alignItems: 'center', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>
                                 <span>€</span>
                                 <input value={customPrice} onChange={e => setCustomPrice(e.target.value)} onFocus={e => e.target.select()} type="number" inputMode="decimal" step="0.01" min="0" className="clean-input" placeholder="0.00" style={{ width: '60px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500, padding: 0, marginLeft: '2px' }} />
@@ -313,31 +313,34 @@ export default function Home() {
                         </div>
                     </div>
 
-                    <div className="notes-section">
-                        <div className="notes-header">
-                            <label>Opmerkingen</label>
-                            <span className="char-count">{note.length}/50</span>
-                        </div>
-                        <textarea value={note} onChange={e => setNote(e.target.value.slice(0,50))} className="clean-textarea" rows="2" placeholder="Optioneel..."></textarea>
-                    </div>
                 </div>
                 <div className="bottom-spacer" />
             </main>
 
-            <footer className="bottom-bar glass-bottom">
-                <div className="total-wrap">
-                    <span className="total-label">Subtotaal</span>
-                    <span className="total-amount">{eur(total)}</span>
+            <footer className="bottom-bar glass-bottom" style={{ height: 'auto', flexDirection: 'column', alignItems: 'stretch', gap: '12px', paddingTop: '16px', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}>
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px 16px', borderRadius: '12px', border: '0.5px solid var(--border-glass)' }}>
+                    <div className="notes-header" style={{ marginBottom: '4px' }}>
+                        <label style={{color: 'var(--text-secondary)'}}>Opmerking / Referentie</label>
+                        <span className="char-count">{note.length}/50</span>
+                    </div>
+                    <textarea value={note} onChange={e => setNote(e.target.value.slice(0,50))} className="clean-textarea" rows="1" placeholder="Typ optioneel kort..." style={{minHeight: '24px'}}></textarea>
                 </div>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    {hasDataToClear && (
-                        <button onClick={() => { setShowClearSheet(true); if(window.navigator?.vibrate) window.navigator.vibrate(10); }} style={{background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text-secondary)', padding: '12px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'}}>
-                            <Trash2 size={20} />
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div className="total-wrap">
+                        <span className="total-label">Subtotaal</span>
+                        <span className="total-amount">{eur(total)}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        {hasDataToClear && (
+                            <button onClick={() => { setShowClearSheet(true); if(window.navigator?.vibrate) window.navigator.vibrate(10); }} style={{background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text-secondary)', padding: '12px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'}}>
+                                <Trash2 size={20} />
+                            </button>
+                        )}
+                        <button className="btn-primary" onClick={() => { setShowQrSheet(true); if(window.navigator?.vibrate) window.navigator.vibrate(50); }} disabled={total === 0} style={{ opacity: total === 0 ? 0.5 : 1 }}>
+                            Betalen
                         </button>
-                    )}
-                    <button className="btn-primary" onClick={() => { setShowQrSheet(true); if(window.navigator?.vibrate) window.navigator.vibrate(50); }} disabled={total === 0} style={{ opacity: total === 0 ? 0.5 : 1 }}>
-                        Betalen
-                    </button>
+                    </div>
                 </div>
             </footer>
 
