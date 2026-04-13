@@ -59,6 +59,7 @@ export default function Home() {
         setCounts({});
         setCustomCount(0);
         setShowClearSheet(false);
+        setShowQrSheet(false);
         if(window.navigator?.vibrate) window.navigator.vibrate(50);
     };
 
@@ -221,12 +222,13 @@ export default function Home() {
                         )
                     })}
 
-                    <div className="item-card custom-card">
-                        <div className="item-info custom-inputs">
-                            <input value={customLabel} onChange={e => setCustomLabel(e.target.value)} type="text" className="clean-input" placeholder="Custom Item" />
-                            <div className="custom-price-wrapper">
+                    <div className="item-card" style={{ gap: '12px' }}>
+                        <div className="item-info" style={{ flex: 1 }}>
+                            <input value={customLabel} onChange={e => setCustomLabel(e.target.value)} type="text" className="clean-input item-title" placeholder="Custom Item" style={{ padding: 0 }} />
+                            <div style={{ display: 'flex', alignItems: 'center', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>
                                 <span>€</span>
-                                <input value={customPrice} onChange={e => setCustomPrice(e.target.value)} onFocus={e => e.target.select()} type="number" inputMode="decimal" step="0.01" min="0" className="clean-input price-input" placeholder="0.00" />
+                                <input value={customPrice} onChange={e => setCustomPrice(e.target.value)} onFocus={e => e.target.select()} type="number" inputMode="decimal" step="0.01" min="0" className="clean-input" placeholder="0.00" style={{ width: '60px', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500, padding: 0, marginLeft: '2px' }} />
+                                <span style={{ marginLeft: '4px' }}>/st.</span>
                             </div>
                         </div>
                         <div className="qtywrap">
@@ -278,7 +280,7 @@ export default function Home() {
 
                     <div className="sheet-actions">
                         <button className="btn-action" onClick={handleShare}><Share size={18} /> Delen</button>
-                        <button className="btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={clearAll}>Klaar & Wis</button>
+                        <button className="btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={clearQuantities}>Klaar & Wis</button>
                     </div>
                 </div>
             </div>
