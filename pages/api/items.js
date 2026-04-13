@@ -3,12 +3,12 @@ import fs from 'fs';
 import path from 'path';
 
 const INITIAL_DB = [
-    { sku: 'UITRUSTING', title: 'Volledige uitrusting', price: 30, pos: 1 },
-    { sku: 'FLES', title: 'Fles + vulling', price: 10, pos: 2 },
-    { sku: 'AUTOMAAT', title: 'Ademautomaat', price: 10, pos: 3 },
-    { sku: 'TRIMVEST', title: 'Trimvest', price: 10, pos: 4 },
-    { sku: 'COMPUTER', title: 'Duikcomputer', price: 5, pos: 5 },
-    { sku: 'DUIKPAK', title: 'Duikpak', price: 10, pos: 6 },
+    { sku: 'UITRUSTING', title: 'Volledige uitrusting', price: 30, pos: 1, icon: 'Waves', bgColor: '#1c1c1e', fgColor: '#0a84ff' },
+    { sku: 'FLES', title: 'Fles + vulling', price: 10, pos: 2, icon: 'Battery', bgColor: '#1c1c1e', fgColor: '#0a84ff' },
+    { sku: 'AUTOMAAT', title: 'Ademautomaat', price: 10, pos: 3, icon: 'Wind', bgColor: '#1c1c1e', fgColor: '#0a84ff' },
+    { sku: 'TRIMVEST', title: 'Trimvest', price: 10, pos: 4, icon: 'LifeBuoy', bgColor: '#1c1c1e', fgColor: '#0a84ff' },
+    { sku: 'COMPUTER', title: 'Duikcomputer', price: 5, pos: 5, icon: 'Watch', bgColor: '#1c1c1e', fgColor: '#0a84ff' },
+    { sku: 'DUIKPAK', title: 'Duikpak', price: 10, pos: 6, icon: 'Shirt', bgColor: '#1c1c1e', fgColor: '#0a84ff' },
 ];
 
 const LOCAL_FALLBACK_FILE = path.join(process.cwd(), '.local_items_db.json');

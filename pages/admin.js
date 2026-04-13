@@ -3,6 +3,7 @@ import Head from 'next/head';
 import NextLink from 'next/link';
 import { Save, Plus, Trash2, GripVertical, Lock, Home } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { ICONS, ICON_NAMES } from '../lib/icons';
 
 export default function AdminDashboard() {
     const [pin, setPin] = useState('');
@@ -93,7 +94,10 @@ export default function AdminDashboard() {
             sku: 'NIEUW_' + Math.floor(Math.random()*1000), 
             title: '', 
             price: '', 
-            pos: maxPos + 1 
+            pos: maxPos + 1,
+            icon: 'Box',
+            bgColor: '#1c1c1e',
+            fgColor: '#0a84ff'
         }]);
     };
 
@@ -181,6 +185,31 @@ export default function AdminDashboard() {
                                                     <div style={{flex: 1}}>
                                                         <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '4px'}}>Prijs (€)</label>
                                                         <input className="clean-input" type="number" inputMode="decimal" step="0.01" placeholder="0.00" onFocus={e => e.target.select()} value={item.price} onChange={e => handleChange(i, 'price', e.target.value)} style={{background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px'}}/>
+                                                    </div>
+                                                </div>
+
+                                                <div style={{background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px'}}>
+                                                    <label style={{fontSize: '10px', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '8px'}}>Icoon & Kleuren</label>
+                                                    <div style={{display: 'flex', gap: '16px', marginBottom: '12px'}}>
+                                                        <div style={{flex: 1, display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                                            <input type="color" value={item.bgColor || '#1c1c1e'} onChange={e => handleChange(i, 'bgColor', e.target.value)} style={{width: '32px', height: '32px', border: 'none', padding: 0, borderRadius: '4px', cursor: 'pointer', background: 'transparent'}}/>
+                                                            <span style={{fontSize: '12px', color: 'var(--text-secondary)'}}>Achtergrond</span>
+                                                        </div>
+                                                        <div style={{flex: 1, display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                                            <input type="color" value={item.fgColor || '#0a84ff'} onChange={e => handleChange(i, 'fgColor', e.target.value)} style={{width: '32px', height: '32px', border: 'none', padding: 0, borderRadius: '4px', cursor: 'pointer', background: 'transparent'}}/>
+                                                            <span style={{fontSize: '12px', color: 'var(--text-secondary)'}}>Voorgrond</span>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'auto', gap: '8px', paddingBottom: '4px'}}>
+                                                        {ICON_NAMES.map(name => {
+                                                            const IconComp = ICONS[name];
+                                                            const isSelected = (item.icon || 'Box') === name;
+                                                            return (
+                                                                <div key={name} onClick={() => handleChange(i, 'icon', name)} style={{padding: '8px', borderRadius: '8px', background: isSelected ? 'var(--bg-glass-heavy)' : 'rgba(255,255,255,0.05)', border: isSelected ? '1px solid var(--accent)' : '1px solid transparent', cursor: 'pointer', flexShrink: 0}}>
+                                                                    <IconComp size={20} color={isSelected ? 'var(--accent)' : 'var(--text-secondary)'} />
+                                                                </div>
+                                                            )
+                                                        })}
                                                     </div>
                                                 </div>
                                             </div>

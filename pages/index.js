@@ -3,6 +3,7 @@ import Head from 'next/head';
 import NextLink from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Minus, Plus, Share, Link, Download, Settings, Trash2, RefreshCw } from 'lucide-react';
+import { ICONS } from '../lib/icons';
 
 
 
@@ -269,11 +270,20 @@ export default function Home() {
                 <div className="items-list">
                     {dbItems.map(item => {
                         const q = counts[item.sku] || 0;
+                        const IconComp = ICONS[item.icon] || ICONS['Box'];
+                        const bg = item.bgColor || 'rgba(255,255,255,0.05)';
+                        const fg = item.fgColor || 'var(--accent)';
+
                         return (
                             <div key={item.sku} className="item-card">
-                                <div className="item-info">
-                                    <div className="item-title">{item.title}</div>
-                                    <div className="item-price">€{dot2(item.price)} /st.</div>
+                                <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
+                                    <div style={{width: '40px', height: '40px', borderRadius: '10px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
+                                        <IconComp size={20} color={fg} />
+                                    </div>
+                                    <div className="item-info">
+                                        <div className="item-title">{item.title}</div>
+                                        <div className="item-price">€{dot2(item.price)} /st.</div>
+                                    </div>
                                 </div>
                                 <div className="qtywrap">
                                     <QtyButton onClick={() => updateCount(item.sku, -1)}><Minus size={16} /></QtyButton>
@@ -285,6 +295,9 @@ export default function Home() {
                     })}
 
                     <div className="item-card" style={{ gap: '12px' }}>
+                        <div style={{width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
+                            <Plus size={20} color="var(--text-secondary)" />
+                        </div>
                         <div className="item-info" style={{ flex: 1 }}>
                             <input value={customLabel} onChange={e => setCustomLabel(e.target.value)} type="text" className="clean-input item-title" placeholder="Custom Item" style={{ padding: 0 }} />
                             <div style={{ display: 'flex', alignItems: 'center', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>
