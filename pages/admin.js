@@ -135,7 +135,7 @@ export default function AdminDashboard() {
                         <Home size={20} />
                     </NextLink>
                     <div className="header-content" style={{gap: '4px'}}>
-                        <h1 style={{fontSize: '20px'}}>Database Beheer</h1>
+                        <h1 style={{fontSize: '20px'}}>Beheer</h1>
                         <p>Live Inventaris Aanpassen</p>
                     </div>
                 </div>
