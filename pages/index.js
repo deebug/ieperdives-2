@@ -1,25 +1,272 @@
-import Head from 'next/head'
-import Header from '@components/Header'
-import Footer from '@components/Footer'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import Head from 'next/head';
+import { QRCodeCanvas } from 'qrcode.react';
+import { Minus, Plus, Share, Link, Download } from 'lucide-react';
+
+
+
+const IBAN = "BE73001942760860";
+const BIC = "GEBABEBB";
+const BENEF_NAME = "IEPER DIVES";
+const MAX_REMIT = 140;
+
+const eur = n => new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR' }).format(n || 0);
+const dot2 = n => ((n || 0)).toFixed(2);
+const toAscii = s => s.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[×]/g, 'x').replace(/[—–]/g, '-').replace(/[^\w\s\/\-\+\:\.\,]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
+const byteLen = s => new TextEncoder().encode(s).length;
+
+function truncBytes(s, max) {
+    let lo = 0, hi = s.length;
+    while (lo < hi) { const mid = (lo + hi + 1 >> 1); byteLen(s.slice(0, mid)) <= max ? lo = mid : hi = mid - 1; }
+    return s.slice(0, lo);
+}
 
 export default function Home() {
-  return (
-    <div className="container">
-      <Head>
-        <title>POC — Duikmateriaal Huur (SEPA QR)</title>
-        <link rel="icon" href="/favicon.ico" />
-      <meta name="viewport" content="width=device-width,initial-scale=1" />
+    const [dbItems, setDbItems] = useState([
+        { sku: 'UITRUSTING', title: 'Volledige uitrusting', price: 30, pos: 1 },
+        { sku: 'FLES', title: 'Fles + vulling', price: 10, pos: 2 },
+        { sku: 'AUTOMAAT', title: 'Ademautomaat', price: 10, pos: 3 },
+        { sku: 'TRIMVEST', title: 'Trimvest', price: 10, pos: 4 },
+        { sku: 'COMPUTER', title: 'Duikcomputer', price: 5, pos: 5 },
+        { sku: 'DUIKPAK', title: 'Duikpak', price: 10, pos: 6 },
+    ]);
+    
+    useEffect(() => {
+        fetch('/api/items')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.length) {
+                    setDbItems(data.sort((a,b) => (a.pos || 0) - (b.pos || 0)));
+                }
+            })
+            .catch(console.error);
+    }, []);
 
-      </Head>
+    const [counts, setCounts] = useState({});
+    const [customLabel, setCustomLabel] = useState("");
+    const [customPrice, setCustomPrice] = useState("0");
+    const [customCount, setCustomCount] = useState(0);
+    const [note, setNote] = useState("");
+    
+    const [showQrSheet, setShowQrSheet] = useState(false);
+    const [showInstallSheet, setShowInstallSheet] = useState(false);
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
+    
+    const qrRef = useRef(null);
 
-      <main>
-       
- 
+    useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(console.error);
+        }
+        const handler = (e) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+            if (!localStorage.getItem('pwa_declined')) {
+               setShowInstallSheet(true);
+            }
+        };
+        window.addEventListener('beforeinstallprompt', handler);
+        return () => window.removeEventListener('beforeinstallprompt', handler);
+    }, []);
 
+    const updateCount = useCallback((sku, delta) => {
+        setCounts(prev => {
+            const next = Math.max(0, Math.min(999, (prev[sku] || 0) + delta));
+            if (window.navigator?.vibrate && next !== prev[sku]) window.navigator.vibrate(10);
+            return { ...prev, [sku]: next };
+        });
+    }, []);
 
-      </main>
+    const updateCustomCount = useCallback((delta) => {
+        setCustomCount(prev => {
+            const next = Math.max(0, Math.min(999, prev + delta));
+            if (window.navigator?.vibrate && next !== prev) window.navigator.vibrate(10);
+            return next;
+        });
+    }, []);
 
-      <Footer />
-    </div>
-  )
+    // Long press logic mapping
+    const useLongPress = (callback) => {
+        const timerRef = useRef();
+        const intervalRef = useRef();
+        const start = () => {
+            callback();
+            timerRef.current = setTimeout(() => { intervalRef.current = setInterval(callback, 70); }, 350);
+        };
+        const end = () => { clearTimeout(timerRef.current); clearInterval(intervalRef.current); };
+        return {
+            onPointerDown: (e) => { e.preventDefault(); start(); },
+            onPointerUp: end, onPointerLeave: end, onTouchEnd: end, onTouchCancel: end, onMouseUp: end, onMouseLeave: end
+        };
+    };
+
+    const cPriceVal = Math.max(0, parseFloat((customPrice||"0").replace(',','.')) || 0);
+
+    const { total, remit, epc } = useMemo(() => {
+        let t = 0;
+        const parts = [];
+        dbItems.forEach(item => {
+            const q = counts[item.sku] || 0;
+            if (q > 0) {
+                t += q * item.price;
+                parts.push(`${item.title.split('(')[0].trim()} x ${q}`);
+            }
+        });
+        if (customCount > 0) {
+            t += customCount * cPriceVal;
+            parts.push(`${customLabel.trim() || 'CUSTOM'} x ${customCount}`);
+        }
+
+        let r = parts.length ? parts.join(' / ') : 'GEEN SELECTIE';
+        if (note.trim()) r += ` // ${note.trim()}`;
+        
+        let safeRemit = toAscii(r);
+        if (byteLen(safeRemit) > MAX_REMIT) safeRemit = truncBytes(safeRemit, MAX_REMIT);
+
+        const buildEpc = [
+            'BCD', '001', '1', 'SCT',
+            BIC, BENEF_NAME, IBAN,
+            'EUR' + dot2(t), '', '', safeRemit, ''
+        ].join('\n');
+
+        return { total: t, remit: safeRemit, epc: buildEpc };
+    }, [counts, customCount, customLabel, cPriceVal, note, dbItems]);
+
+    // Share & Export Native
+    const getQrBlob = async () => {
+        if (!qrRef.current) return null;
+        return new Promise(resolve => qrRef.current.toBlob(resolve, 'image/png'));
+    };
+
+    const handleShare = async () => {
+        try {
+            const blob = await getQrBlob();
+            if (!blob) return;
+            const file = new File([blob], 'betaal-qr.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: 'Ieper Dives Betaal-QR', text: 'SEPA QR' });
+            } else {
+               // Fallback copy generic text URL
+               const b64 = btoa(unescape(encodeURIComponent(epc))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '~');
+               const url = window.location.origin + '/qr.html?p=' + b64;
+               if (navigator.share) await navigator.share({title: 'Ieper Dives Betaal-QR', text: url});
+               else {
+                   await navigator.clipboard.writeText(url);
+                   alert('Link gekopieerd!');
+               }
+            }
+        } catch (e) { console.log(e); }
+    };
+
+    const installPWA = () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((c) => {
+           if(c.outcome === 'accepted') setDeferredPrompt(null);
+           setShowInstallSheet(false);
+        });
+    };
+
+    return (
+        <div className="app-shell">
+            <Head><title>Ieper Dives POS</title></Head>
+            
+            <header className="glass-header">
+                <div className="header-content">
+                    <h1>Ieper Dives</h1>
+                    <p>Quick Checkout</p>
+                </div>
+            </header>
+
+            <main className="scrollable-content">
+                <div className="items-list">
+                    {dbItems.map(item => {
+                        const q = counts[item.sku] || 0;
+                        return (
+                            <div key={item.sku} className="item-card">
+                                <div className="item-info">
+                                    <div className="item-title">{item.title}</div>
+                                    <div className="item-price">€{dot2(item.price)} /st.</div>
+                                </div>
+                                <div className="qtywrap">
+                                    <button className="qtybtn" {...useLongPress(() => updateCount(item.sku, -1))}><Minus size={16} /></button>
+                                    <span className="qtyval">{q}</span>
+                                    <button className="qtybtn" {...useLongPress(() => updateCount(item.sku, 1))}><Plus size={16} /></button>
+                                </div>
+                            </div>
+                        )
+                    })}
+
+                    <div className="item-card custom-card">
+                        <div className="item-info custom-inputs">
+                            <input value={customLabel} onChange={e => setCustomLabel(e.target.value)} type="text" className="clean-input" placeholder="Custom Item" />
+                            <div className="custom-price-wrapper">
+                                <span>€</span>
+                                <input value={customPrice} onChange={e => setCustomPrice(e.target.value)} type="number" step="0.01" min="0" className="clean-input price-input" />
+                            </div>
+                        </div>
+                        <div className="qtywrap">
+                            <button className="qtybtn" {...useLongPress(() => updateCustomCount(-1))}><Minus size={16}/></button>
+                            <span className="qtyval">{customCount}</span>
+                            <button className="qtybtn" {...useLongPress(() => updateCustomCount(1))}><Plus size={16}/></button>
+                        </div>
+                    </div>
+
+                    <div className="notes-section">
+                        <div className="notes-header">
+                            <label>Opmerkingen</label>
+                            <span className="char-count">{note.length}/50</span>
+                        </div>
+                        <textarea value={note} onChange={e => setNote(e.target.value.slice(0,50))} className="clean-textarea" rows="2" placeholder="Optioneel..."></textarea>
+                    </div>
+                </div>
+                <div className="bottom-spacer" />
+            </main>
+
+            <footer className="bottom-bar glass-bottom">
+                <div className="total-wrap">
+                    <span className="total-label">Subtotaal</span>
+                    <span className="total-amount">{eur(total)}</span>
+                </div>
+                <button className="btn-primary" onClick={() => { setShowQrSheet(true); if(window.navigator?.vibrate) window.navigator.vibrate(50); }}>
+                    Betalen
+                </button>
+            </footer>
+
+            {/* QR Code Bottom Sheet */}
+            <div className={`sheet-overlay ${showQrSheet ? 'active' : ''}`} onClick={(e) => { if(e.target === e.currentTarget) setShowQrSheet(false) }}>
+                <div className="bottom-sheet">
+                    <div className="sheet-handle-wrap" onClick={() => setShowQrSheet(false)}><div className="sheet-handle"></div></div>
+                    <h2 className="sheet-title">Laat klant scannen</h2>
+                    <p className="sheet-subtitle">SEPA QR • {eur(total)}</p>
+                    
+                    <div className="qr-container">
+                        <div className="qr-glow"></div>
+                        <QRCodeCanvas value={epc} size={200} level="M" ref={qrRef} style={{ width: "100%", height: "100%", display: "block" }} />
+                    </div>
+
+                    <div className="sheet-actions">
+                        <button className="btn-action" onClick={handleShare}><Share size={18} /> Delen</button>
+                    </div>
+                </div>
+            </div>
+
+            {/* PWA Install Sheet */}
+            <div className={`sheet-overlay ${showInstallSheet ? 'active' : ''}`} onClick={(e) => { if(e.target === e.currentTarget) setShowInstallSheet(false) }}>
+                <div className="bottom-sheet">
+                    <div className="sheet-handle-wrap" onClick={() => setShowInstallSheet(false)}><div className="sheet-handle"></div></div>
+                    <div className="install-card">
+                       <img src="/ieper_logo.png" className="install-icon" alt="icon"/>
+                       <h2 className="sheet-title">Installeer Ieper Dives</h2>
+                       <p className="sheet-subtitle">Plaats de app rechtstreeks op je startscherm voor offline toegang en een snellere opstart.</p>
+                       <div className="sheet-actions" style={{width: '100%'}}>
+                          <button className="btn-action" onClick={() => { setShowInstallSheet(false); localStorage.setItem('pwa_declined', '1'); }}>Nee bedankt</button>
+                          <button className="btn-primary" style={{flex: 1, justifyContent: 'center'}} onClick={installPWA}><Download size={18}/> Installeer App</button>
+                       </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    );
 }
