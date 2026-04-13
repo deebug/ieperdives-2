@@ -101,6 +101,9 @@ export default function AdminDashboard() {
         return (
             <div className="app-shell" style={{justifyContent: 'center', alignItems: 'center'}}>
                 <Head><title>Admin Login</title></Head>
+                <NextLink href="/" style={{position: 'absolute', top: '24px', left: '24px', background: 'var(--bg-surface)', border: '0.5px solid var(--border-glass)', color: 'var(--text-primary)', padding: '12px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10}}>
+                    <Home size={24} />
+                </NextLink>
                 <div className="item-card" style={{flexDirection: 'column', padding: '32px', width: '300px', gap: '24px'}}>
                     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
                         <Lock size={32} color="var(--accent)"/>

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
-import { Minus, Plus, Share, Link, Download, Settings } from 'lucide-react';
+import { Minus, Plus, Share, Link, Download, Settings, Trash2 } from 'lucide-react';
 
 
 
@@ -48,12 +48,31 @@ export default function Home() {
     const [customPrice, setCustomPrice] = useState("");
     const [customCount, setCustomCount] = useState(0);
     const [note, setNote] = useState("");
-    
+    const [showClearSheet, setShowClearSheet] = useState(false);
     const [showQrSheet, setShowQrSheet] = useState(false);
     const [showInstallSheet, setShowInstallSheet] = useState(false);
     const [deferredPrompt, setDeferredPrompt] = useState(null);
     
     const qrRef = useRef(null);
+
+    const clearQuantities = () => {
+        setCounts({});
+        setCustomCount(0);
+        setShowClearSheet(false);
+        if(window.navigator?.vibrate) window.navigator.vibrate(50);
+    };
+
+    const clearAll = () => {
+        setCounts({});
+        setCustomCount(0);
+        setCustomLabel('');
+        setCustomPrice('');
+        setNote('');
+        setShowClearSheet(false);
+        if(window.navigator?.vibrate) window.navigator.vibrate(50);
+    };
+    
+    const hasDataToClear = Object.values(counts).some(c => c > 0) || customCount > 0 || customLabel || customPrice || note;
 
     useEffect(() => {
         if ('serviceWorker' in navigator) {
@@ -232,9 +251,16 @@ export default function Home() {
                     <span className="total-label">Subtotaal</span>
                     <span className="total-amount">{eur(total)}</span>
                 </div>
-                <button className="btn-primary" onClick={() => { setShowQrSheet(true); if(window.navigator?.vibrate) window.navigator.vibrate(50); }}>
-                    Betalen
-                </button>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    {hasDataToClear && (
+                        <button onClick={() => { setShowClearSheet(true); if(window.navigator?.vibrate) window.navigator.vibrate(10); }} style={{background: 'rgba(255,255,255,0.08)', border: 'none', color: 'var(--text-secondary)', padding: '12px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'}}>
+                            <Trash2 size={20} />
+                        </button>
+                    )}
+                    <button className="btn-primary" onClick={() => { setShowQrSheet(true); if(window.navigator?.vibrate) window.navigator.vibrate(50); }} disabled={total === 0} style={{ opacity: total === 0 ? 0.5 : 1 }}>
+                        Betalen
+                    </button>
+                </div>
             </footer>
 
             {/* QR Code Bottom Sheet */}
@@ -268,6 +294,26 @@ export default function Home() {
                           <button className="btn-primary" style={{flex: 1, justifyContent: 'center'}} onClick={installPWA}><Download size={18}/> Installeer App</button>
                        </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Clear Action Sheet */}
+            <div className={`sheet-overlay ${showClearSheet ? 'active' : ''}`} onClick={(e) => { if(e.target === e.currentTarget) setShowClearSheet(false) }}>
+                <div className="bottom-sheet" style={{background: 'transparent', boxShadow: 'none', padding: '0 16px 32px'}}>
+                    <div style={{background: 'var(--bg-surface)', borderRadius: '14px', marginBottom: '8px', overflow: 'hidden'}}>
+                        <div style={{padding: '16px', textAlign: 'center', borderBottom: '0.5px solid var(--border-glass)', fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500}}>
+                            Wat wil je wissen?
+                        </div>
+                        <button onClick={clearQuantities} style={{width: '100%', padding: '16px', background: 'transparent', border: 'none', borderBottom: '0.5px solid var(--border-glass)', color: 'var(--text-primary)', fontSize: '17px', cursor: 'pointer'}}>
+                            Alleen aantallen
+                        </button>
+                        <button onClick={clearAll} style={{width: '100%', padding: '16px', background: 'transparent', border: 'none', color: '#ff3b30', fontSize: '17px', cursor: 'pointer', fontWeight: 500}}>
+                            Wis alles
+                        </button>
+                    </div>
+                    <button onClick={() => setShowClearSheet(false)} style={{width: '100%', padding: '16px', background: 'var(--bg-surface)', border: 'none', borderRadius: '14px', color: 'var(--accent)', fontSize: '17px', fontWeight: 600, cursor: 'pointer'}}>
+                        Annuleer
+                    </button>
                 </div>
             </div>
 
