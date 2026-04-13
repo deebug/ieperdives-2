@@ -226,7 +226,7 @@ export default function Home() {
                             <input value={customLabel} onChange={e => setCustomLabel(e.target.value)} type="text" className="clean-input" placeholder="Custom Item" />
                             <div className="custom-price-wrapper">
                                 <span>€</span>
-                                <input value={customPrice} onChange={e => setCustomPrice(e.target.value)} onFocus={e => e.target.select()} type="number" step="0.01" min="0" className="clean-input price-input" placeholder="0.00" />
+                                <input value={customPrice} onChange={e => setCustomPrice(e.target.value)} onFocus={e => e.target.select()} type="number" inputMode="decimal" step="0.01" min="0" className="clean-input price-input" placeholder="0.00" />
                             </div>
                         </div>
                         <div className="qtywrap">
